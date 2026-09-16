@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Timer</title>
+  <!-- Pure Black SVG Clock Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0d0e;
+      --card-bg: #141618;
+      --border: #22252a;
+      --text: #e1e4ea;
+      --text-muted: #626875;
+      --accent: #d1d5db;
+      --danger: #ef4444;
+      --scrollbar-thumb: #2b2f36;
+      --scrollbar-hover: #3d424c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Left: Today's Total */
+    .today-reading {
+      position: absolute;
+      top: 32px;
+      left: 32px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      z-index: 10;
+    }
+
+    .today-reading span {
+      color: var(--accent);
+      font-weight: 500;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* Top Right: History Trigger */
+    .history-btn {
+      position: absolute;
+      top: 28px;
+      right: 32px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: color 0.2s ease, background 0.2s ease;
+      z-index: 10;
+    }
+
+    .history-btn:hover {
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Bottom Right: Live Clock (No seconds) */
+    .live-clock {
+      position: absolute;
+      bottom: 28px;
+      right: 32px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      z-index: 10;
+    }
+
+    /* Middle Left Edge: Compact Reset Button */
+    .edge-reset-btn {
+      position: fixed;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 20;
+    }
+
+    .edge-reset-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .edge-reset-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    /* Top Center: Title & Description */
+    .top-section {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      z-index: 10;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      width: 100%;
+      gap: 6px;
+    }
+
+    .session-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .session-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid transparent;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .session-title {
+      font-size: 1.15rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      flex: 1;
+      max-width: 320px;
+      text-align: left;
+    }
+
+    .session-desc {
+      width: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .session-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .session-input:focus {
+      border-bottom-color: var(--border);
+    }
+
+    /* Middle: Centered Timer */
+    .timer-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    .timer-display {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(3.8rem, 10vw, 6.5rem);
+      letter-spacing: 0.12em;
+      color: var(--text);
+    }
+
+    /* Bottom: Controls */
+    .bottom-controls {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      z-index: 10;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .icon-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.04);
+      transform: scale(1.05);
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      border-color: var(--border);
+    }
+
+    /* Fullscreen History Overlay */
+    .modal-fullscreen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+    }
+
+    .modal-fullscreen.open {
+      display: flex;
+    }
+
+    .modal-shell {
+      width: 100%;
+      max-width: 820px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.6rem;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.15s ease;
+    }
+
+    .close-btn:hover {
+      color: var(--text);
+    }
+
+    /* Custom Scrollbar Container */
+    .modal-content {
+      padding: 32px 16px 40px 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      flex: 1;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) transparent;
+    }
+
+    .modal-content::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-hover);
+    }
+
+    .date-group h4 {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 6px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      position: relative;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-item-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 65%;
+      flex: 1;
+    }
+
+    .history-item-title {
+      font-size: 0.95rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .inline-edit-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--accent);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      padding: 2px 0;
+      width: 100%;
+    }
+
+    .history-item-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .history-item-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .history-item-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    /* 3-Dots Dropdown Menu */
+    .menu-wrap {
+      position: relative;
+    }
+
+    .menu-trigger {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 1.2rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-trigger:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 4px;
+      background: #181a1d;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 150;
+      min-width: 110px;
+      overflow: hidden;
+    }
+
+    .dropdown-menu.active {
+      display: block;
+    }
+
+    .dropdown-menu button {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 0.82rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: block;
+    }
+
+    .dropdown-menu button:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .dropdown-menu button.danger {
+      color: var(--danger);
+    }
+
+    .dropdown-menu button.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top-left Today total -->
+  <div class="today-reading">
+    TODAY: <span id="todayTotal">00:00:00</span>
+  </div>
+
+  <!-- Top-right History Icon -->
+  <button class="history-btn" id="openHistory" aria-label="Open History" title="View History">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
+  </button>
+
+  <!-- Left Middle Reset Button -->
+  <button class="edge-reset-btn" id="resetBtn" aria-label="Reset Timer (R)" title="Reset Timer [R]">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+      <path d="M3 3v5h5"></path>
+    </svg>
+  </button>
+
+  <!-- Top: Centered Name & Description Inputs with S{N}: prefix -->
+  <header class="top-section">
+    <div class="title-row">
+      <span class="session-badge" id="sessionBadge">S1:</span>
+      <input type="text" id="sessionName" class="session-input session-title" placeholder="Session Title" autocomplete="off" />
+    </div>
+    <input type="text" id="sessionDesc" class="session-input session-desc" placeholder="Add a short description..." autocomplete="off" />
+  </header>
+
+  <!-- Middle: Centered Timer -->
+  <main class="timer-center">
+    <div class="timer-display" id="display">00:00:00</div>
+  </main>
+
+  <!-- Bottom: Controls -->
+  <footer class="bottom-controls">
+    <button class="icon-btn" id="playPauseBtn" aria-label="Start / Pause (Space or K)" title="Play / Pause [Space / K]">
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      </svg>
+    </button>
+
+    <button class="icon-btn" id="stopBtn" disabled aria-label="Complete and Save (Enter)" title="Complete & Save [Enter]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </button>
+  </footer>
+
+  <!-- Bottom Right: Live Date & Clock without Seconds -->
+  <div class="live-clock" id="liveClock">--</div>
+
+  <!-- Fullscreen History Screen -->
+  <div class="modal-fullscreen" id="historyModal">
+    <div class="modal-shell">
+      <div class="modal-header">
+        <h3>Study History</h3>
+        <button class="close-btn" id="closeHistory" aria-label="Close History">&times;</button>
+      </div>
+      <div class="modal-content" id="historyContainer"></div>
+    </div>
+  </div>
+
+  <!-- Firebase Modular SDK Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDvyIQNVjXPnVnYQWIcPrr5lrEAKbGr54k",
+      authDomain: "ewtube-b3413.firebaseapp.com",
+      databaseURL: "https://ewtube-b3413-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ewtube-b3413",
+      storageBucket: "ewtube-b3413.firebasestorage.app",
+      messagingSenderId: "67454816410",
+      appId: "1:67454816410:web:27d326bf9668e5c64fcf23"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const sessionsRef = ref(db, 'study_sessions');
+
+    let cachedSessions = [];
+    let secondsElapsed = 0;
+    let timerInterval = null;
+
+    const display = document.getElementById('display');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const stopBtn = document.getElementById('stopBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const sessionBadge = document.getElementById('sessionBadge');
+    const nameInput = document.getElementById('sessionName');
+    const descInput = document.getElementById('sessionDesc');
+    const todayTotalDisplay = document.getElementById('todayTotal');
+    const historyModal = document.getElementById('historyModal');
+    const openHistory = document.getElementById('openHistory');
+    const closeHistory = document.getElementById('closeHistory');
+    const historyContainer = document.getElementById('historyContainer');
+    const liveClock = document.getElementById('liveClock');
+
+    function formatTime(totalSeconds) {
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function getNextSessionNumber() {
+      if (!cachedSessions.length) return 1;
+      const numbers = cachedSessions.map(item => item.sessionNum || 0);
+      return Math.max(...numbers, 0) + 1;
+    }
+
+    function updateSessionBadge() {
+      const nextNum = getNextSessionNumber();
+      sessionBadge.textContent = `S${nextNum}:`;
+    }
+
+    function updateTodayTotal() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todaySeconds = cachedSessions
+        .filter(entry => entry.date === todayStr)
+        .reduce((sum, entry) => sum + entry.duration, 0);
+      todayTotalDisplay.textContent = formatTime(todaySeconds);
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+      });
+      const timeStr = now.toLocaleTimeString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      liveClock.textContent = `${dateStr} · ${timeStr}`;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+
+    function setRunningState(isRunning) {
+      if (isRunning) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+        playPauseBtn.title = 'Pause [Space / K]';
+        stopBtn.disabled = false;
+      } else {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        playPauseBtn.title = secondsElapsed > 0 ? 'Resume [Space / K]' : 'Start [Space / K]';
+      }
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+        menu.classList.remove('active');
+      });
+    }
+
+    // Realtime Database Sync Listener
+    onValue(sessionsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        cachedSessions = Object.keys(data).map(key => ({
+          firebaseKey: key,
+          ...data[key]
+        })).sort((a, b) => b.createdAt - a.createdAt);
+      } else {
+        cachedSessions = [];
+      }
+      updateTodayTotal();
+      updateSessionBadge();
+      if (historyModal.classList.contains('open')) {
+        renderHistory();
+      }
+    });
+
+    function renderHistory() {
+      if (!cachedSessions.length) {
+        historyContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 48px 0;">No sessions recorded yet.</p>';
+        return;
+      }
+
+      const grouped = cachedSessions.reduce((acc, curr) => {
+        acc[curr.date] = acc[curr.date] || [];
+        acc[curr.date].push(curr);
+        return acc;
+      }, {});
+
+      historyContainer.innerHTML = '';
+      Object.keys(grouped).forEach(date => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'date-group';
+
+        const dateLabel = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        groupEl.innerHTML = `<h4>${dateLabel}</h4>`;
+
+        grouped[date].forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'history-item';
+          row.id = `history-item-${item.firebaseKey}`;
+          row.innerHTML = `
+            <div class="history-item-meta">
+              <span class="history-item-title" id="title-text-${item.firebaseKey}">${item.name}</span>
+              ${item.desc ? `<span class="history-item-desc">${item.desc}</span>` : ''}
+            </div>
+            <div class="history-item-right">
+              <div class="history-item-time">${formatTime(item.duration)}</div>
+              <div class="menu-wrap">
+                <button class="menu-trigger" data-key="${item.firebaseKey}" aria-label="Options">&#8942;</button>
+                <div class="dropdown-menu" id="menu-${item.firebaseKey}">
+                  <button class="rename-action" data-key="${item.firebaseKey}">Rename</button>
+                  <button class="danger delete-action" data-key="${item.firebaseKey}">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+          groupEl.appendChild(row);
+        });
+
+        historyContainer.appendChild(groupEl);
+      });
+
+      // Dropdown toggle
+      document.querySelectorAll('.menu-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const menuId = `menu-${btn.dataset.key}`;
+          const targetMenu = document.getElementById(menuId);
+          const wasOpen = targetMenu.classList.contains('active');
+          closeAllDropdowns();
+          if (!wasOpen) targetMenu.classList.add('active');
+        });
+      });
+
+      // Inline renaming
+      document.querySelectorAll('.rename-action').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeAllDropdowns();
+          startInlineRename(btn.dataset.key);
+        });
+      });
+
+      // Delete action with confirmation
+      document.querySelectorAll('.delete-action').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          closeAllDropdowns();
+          const key = btn.dataset.key;
+          if (confirm('Delete this study session record?')) {
+            await remove(ref(db, `study_sessions/${key}`));
+          }
+        });
+      });
+    }
+
+    function startInlineRename(key) {
+      const titleSpan = document.getElementById(`title-text-${key}`);
+      if (!titleSpan || titleSpan.querySelector('input')) return;
+
+      const record = cachedSessions.find(h => h.firebaseKey === key);
+      if (!record) return;
+
+      const oldName = record.name;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'inline-edit-input';
+      input.value = oldName;
+
+      titleSpan.replaceWith(input);
+      input.focus();
+      input.select();
+
+      let committed = false;
+      const commit = async () => {
+        if (committed) return;
+        committed = true;
+        const newName = input.value.trim();
+        if (newName && newName !== oldName) {
+          await update(ref(db, `study_sessions/${key}`), { name: newName });
+        }
+        renderHistory();
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          commit();
+        } else if (e.key === 'Escape') {
+          committed = true;
+          renderHistory();
+        }
+      });
+
+      input.addEventListener('blur', commit);
+    }
+
+    function toggleTimer() {
+      if (!timerInterval) {
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          display.textContent = formatTime(secondsElapsed);
+        }, 1000);
+        setRunningState(true);
+      } else {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        setRunningState(false);
+      }
+    }
+
+    async function finishSession() {
+      if (secondsElapsed > 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+
+        const sessionNum = getNextSessionNumber();
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const defaultName = `S${sessionNum}: ${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+        const inputVal = nameInput.value.trim();
+        const sessionTitle = inputVal ? `S${sessionNum}: ${inputVal}` : defaultName;
+
+        const sessionData = {
+          sessionNum: sessionNum,
+          name: sessionTitle,
+          desc: descInput.value.trim(),
+          duration: secondsElapsed,
+          date: `${yyyy}-${mm}-${dd}`,
+          createdAt: Date.now()
+        };
+
+        const newSessionRef = push(sessionsRef);
+        await set(newSessionRef, sessionData);
+
+        secondsElapsed = 0;
+        display.textContent = '00:00:00';
+        setRunningState(false);
+        stopBtn.disabled = true;
+        nameInput.value = '';
+        descInput.value = '';
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      secondsElapsed = 0;
+      display.textContent = '00:00:00';
+      setRunningState(false);
+      stopBtn.disabled = true;
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    }
+
+    playPauseBtn.addEventListener('click', toggleTimer);
+    stopBtn.addEventListener('click', finishSession);
+    resetBtn.addEventListener('click', resetTimer);
+
+    // Global Key Handlers
+    window.addEventListener('keydown', (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (activeTag === 'input' || activeTag === 'textarea') {
+        if (e.key === 'Enter' && document.activeElement.id === 'sessionName') {
+          e.preventDefault();
+          document.activeElement.blur();
+          finishSession();
+        }
+        return;
+      }
+
+      if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault();
+        toggleTimer();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        finishSession();
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        resetTimer();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        if (historyModal.classList.contains('open')) {
+          historyModal.classList.remove('open');
+          closeAllDropdowns();
+        }
+      }
+    });
+
+    openHistory.addEventListener('click', () => {
+      renderHistory();
+      historyModal.classList.add('open');
+    });
+
+    closeHistory.addEventListener('click', () => {
+      historyModal.classList.remove('open');
+      closeAllDropdowns();
+    });
+
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
+        closeAllDropdowns();
+      }
+    });
+  </script>
+</body>
+</html>

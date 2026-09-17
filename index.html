@@ -208,7 +208,7 @@
       color: var(--text);
     }
 
-    /* Right Middle Mini Preview Player */
+    /* Right Middle Preview Player */
     .mini-pip-container {
       display: none;
       position: fixed;
@@ -245,7 +245,6 @@
       overflow: hidden;
     }
 
-    /* Scaled and cropped iframe to shift out top & bottom YouTube elements */
     .mini-pip-frame iframe {
       position: absolute;
       top: -38%;
@@ -257,7 +256,7 @@
       pointer-events: none;
     }
 
-    /* Anti-Clutter Mask: Covers YouTube native pause/idle gray play buttons and titles */
+    /* Native Clutter Mask: Blocks YouTube UI on pause / buffer */
     .pip-obscure-mask {
       position: absolute;
       inset: 0;
@@ -269,10 +268,10 @@
     }
 
     .pip-obscure-mask.blocked {
-      opacity: 0.88;
+      opacity: 0.9;
     }
 
-    /* Hover Overlay (Single Minimalist Play/Pause Disc) */
+    /* Hover Overlay */
     .mini-pip-overlay {
       position: absolute;
       inset: 0;
@@ -436,7 +435,7 @@
       color: var(--text);
     }
 
-    /* Custom Scrollbar Container */
+    /* Scrollbar Container */
     .modal-content {
       padding: 24px 16px 40px 0;
       overflow-y: auto;
@@ -701,7 +700,7 @@
       color: var(--text-muted);
     }
 
-    /* Add Music URL / Video ID Form */
+    /* Add Music URL Form */
     .music-add-form {
       display: flex;
       gap: 12px;
@@ -808,10 +807,10 @@
       </svg>
     </button>
 
-    <!-- Native Clutter Mask Layer -->
+    <!-- Clutter Mask -->
     <div class="pip-obscure-mask" id="pipMask"></div>
 
-    <!-- Custom Single Play/Pause Trigger Overlay -->
+    <!-- Custom Center Play/Pause Disc -->
     <div class="mini-pip-overlay" id="pipOverlay">
       <div class="pip-center-toggle" id="pipPlayPauseBtn" title="Play / Pause">
         <svg id="pipPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -972,6 +971,9 @@
     let totalDuration = 0;
     let syncInterval = null;
 
+    // Audio Output Hardware Tracking (Headphone Detection)
+    let knownAudioDeviceCount = 0;
+
     // Elements
     const display = document.getElementById('display');
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -1089,7 +1091,6 @@
       miniPipContainer.classList.add('active');
       musicModal.classList.remove('open');
 
-      // Turn on obscure mask while frame loads
       pipMask.classList.add('blocked');
 
       const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&cc_load_policy=0&iv_load_policy=3`;
@@ -1122,6 +1123,16 @@
         sendYTCommand('playVideo');
         updatePlayerUIState(true);
       }
+    }
+
+    function closeAndStopPlayer() {
+      miniPipContainer.classList.remove('active');
+      sendYTCommand('stopVideo');
+      ytPlayerContainer.innerHTML = '';
+      pipMask.classList.remove('blocked');
+      clearInterval(syncInterval);
+      updatePlayerUIState(false);
+      panelStatus.textContent = 'IDLE';
     }
 
     function updatePlayerUIState(playing) {
@@ -1194,6 +1205,28 @@
       return `${String(m).padStart(2, '0')}:${String(remain).padStart(2, '0')}`;
     }
 
+    // Hardware Jack Disconnection Watcher: Closes and stops the player automatically
+    if (navigator.mediaDevices && navigator.mediaDevices.ondevicechange !== undefined) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const audioDevices = devices.filter(d => d.kind === 'audiooutput' || d.kind === 'audioinput');
+        knownAudioDeviceCount = audioDevices.length;
+      }).catch(() => {});
+
+      navigator.mediaDevices.addEventListener('devicechange', async () => {
+        try {
+          const updatedDevices = await navigator.mediaDevices.enumerateDevices();
+          const currentAudioDevices = updatedDevices.filter(d => d.kind === 'audiooutput' || d.kind === 'audioinput');
+
+          if (currentAudioDevices.length <= knownAudioDeviceCount && isPlaying) {
+            closeAndStopPlayer();
+          }
+          knownAudioDeviceCount = currentAudioDevices.length;
+        } catch (e) {
+          if (isPlaying) closeAndStopPlayer();
+        }
+      });
+    }
+
     pipPlayPauseBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       togglePlayback();
@@ -1205,13 +1238,7 @@
 
     closePipBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      miniPipContainer.classList.remove('active');
-      sendYTCommand('stopVideo');
-      ytPlayerContainer.innerHTML = '';
-      pipMask.classList.remove('blocked');
-      clearInterval(syncInterval);
-      updatePlayerUIState(false);
-      panelStatus.textContent = 'IDLE';
+      closeAndStopPlayer();
     });
 
     panelPlayPauseBtn.addEventListener('click', togglePlayback);

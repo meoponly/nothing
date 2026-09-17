@@ -9,8 +9,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- YouTube IFrame API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     :root {
       --bg: #0c0d0e;
@@ -234,18 +232,18 @@
     }
 
     .mini-pip-frame iframe {
-      width: 100% !important;
-      height: 100% !important;
+      width: 100%;
+      height: 100%;
       border: none;
       display: block;
     }
 
-    /* Hover close icon */
+    /* Hover close button */
     .mini-pip-close {
       position: absolute;
       top: 6px;
       right: 6px;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #fff;
       width: 20px;
@@ -370,7 +368,7 @@
       color: var(--text);
     }
 
-    /* Scrollbar Container */
+    /* Custom Scrollbar Container */
     .modal-content {
       padding: 24px 16px 40px 0;
       overflow-y: auto;
@@ -723,7 +721,7 @@
         </svg>
       </button>
       <div class="mini-pip-frame">
-        <div id="ytPlayerContainer"></div>
+        <div id="ytPlayerContainer" style="width: 100%; height: 100%;"></div>
       </div>
     </div>
   </main>
@@ -812,7 +810,6 @@
     let cachedTracks = [];
     let secondsElapsed = 0;
     let timerInterval = null;
-    let ytPlayer = null;
 
     // Elements
     const display = document.getElementById('display');
@@ -829,6 +826,7 @@
 
     // Mini Pip Box Elements
     const miniPipContainer = document.getElementById('miniPipContainer');
+    const ytPlayerContainer = document.getElementById('ytPlayerContainer');
     const closePipBtn = document.getElementById('closePipBtn');
 
     // Modals
@@ -879,58 +877,26 @@
       return match ? match[1] : null;
     }
 
-    // Play Track using the official YouTube API
-    window.playTrack = function(videoId) {
+    // Play video in preview frame without third-party referrer block
+    function playTrack(videoId) {
       if (!videoId) return;
 
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&rel=0`;
+
+      ytPlayerContainer.innerHTML = `
+        <iframe 
+          src="${embedUrl}" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      `;
       miniPipContainer.classList.add('active');
       musicModal.classList.remove('open');
-
-      if (window.YT && window.YT.Player) {
-        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-          ytPlayer.loadVideoById(videoId);
-          ytPlayer.unMute();
-          ytPlayer.playVideo();
-        } else {
-          document.getElementById('ytPlayerContainer').innerHTML = '<div id="yt-frame"></div>';
-          ytPlayer = new YT.Player('yt-frame', {
-            videoId: videoId,
-            playerVars: {
-              autoplay: 1,
-              playsinline: 1,
-              rel: 0,
-              modestbranding: 1,
-              controls: 1,
-              origin: window.location.origin
-            },
-            events: {
-              onReady: (event) => {
-                event.target.unMute();
-                event.target.playVideo();
-              }
-            }
-          });
-        }
-      } else {
-        // Direct Fallback if API hasn't resolved
-        const fallback = document.getElementById('ytPlayerContainer');
-        fallback.innerHTML = `
-          <iframe 
-            src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-          </iframe>
-        `;
-      }
-    };
+    }
 
     closePipBtn.addEventListener('click', () => {
       miniPipContainer.classList.remove('active');
-      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo();
-      }
-      document.getElementById('ytPlayerContainer').innerHTML = '';
-      ytPlayer = null;
+      ytPlayerContainer.innerHTML = '';
     });
 
     // Add Music Form Submission
@@ -1021,7 +987,7 @@
       musicContainer.querySelectorAll('.music-play-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const vid = btn.dataset.video;
-          window.playTrack(vid);
+          playTrack(vid);
         });
       });
 

@@ -242,19 +242,26 @@
       filter: grayscale(15%);
       transition: opacity 0.2s ease, filter 0.2s ease;
       pointer-events: auto;
-      cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
+    .floating-sticker:not(.locked) {
+      cursor: grab;
+    }
+
+    .floating-sticker:not(.locked):active {
+      cursor: grabbing;
+    }
+
+    .floating-sticker.locked {
+      cursor: default;
+    }
+
     .floating-sticker:hover {
       opacity: 0.9;
       filter: grayscale(0%);
-    }
-
-    .floating-sticker:active {
-      cursor: grabbing;
     }
 
     .floating-sticker img {
@@ -265,17 +272,29 @@
       display: block;
     }
 
-    .sticker-delete-tag {
+    /* Sticker Control Tags on Hover */
+    .sticker-actions-overlay {
       position: absolute;
-      top: -6px;
-      right: -6px;
+      top: -8px;
+      right: -8px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      z-index: 15;
+    }
+
+    .floating-sticker:hover .sticker-actions-overlay {
+      display: flex;
+    }
+
+    .sticker-tag-btn {
       background: #141618;
       border: 1px solid var(--border);
       color: var(--text-muted);
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
@@ -284,14 +303,16 @@
       transition: all 0.2s ease;
     }
 
-    .floating-sticker:hover .sticker-delete-tag {
-      display: flex;
-    }
-
-    .sticker-delete-tag:hover {
+    .sticker-tag-btn:hover {
       color: var(--text);
       border-color: var(--accent);
       background: rgba(255, 255, 255, 0.08);
+    }
+
+    .sticker-tag-btn.active-lock {
+      color: #10b981;
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.12);
     }
 
     /* Right Middle Preview Player */
@@ -331,7 +352,6 @@
       overflow: hidden;
     }
 
-    /* Aggressive crop to cut away YouTube title bar and top overlay */
     .mini-pip-frame iframe {
       position: absolute;
       top: -85px;
@@ -1635,7 +1655,6 @@
       isSeeking = false;
     });
 
-    // Add Music: Stays on modal without redirecting to timer
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawInput = musicUrlInput.value.trim();
@@ -1787,20 +1806,20 @@
       });
     }
 
-    // Save Sticker to Firebase
+    // Save Sticker to Firebase with lock flag
     async function saveSticker(url) {
       const stickerData = {
         url: url,
         x: 60,
         y: 120,
         size: 140,
+        locked: false,
         createdAt: Date.now()
       };
       const newRef = push(stickersRef);
       await set(newRef, stickerData);
     }
 
-    // Add Sticker via URL
     addStickerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const url = stickerUrlInput.value.trim();
@@ -1813,7 +1832,6 @@
       }
     });
 
-    // Add Sticker via Local File Upload (Base64 data URL)
     localStickerFile.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1851,8 +1869,9 @@
     function renderStickersOnTimer() {
       stickersCanvas.innerHTML = '';
       cachedStickers.forEach(stk => {
+        const isLocked = !!stk.locked;
         const el = document.createElement('div');
-        el.className = 'floating-sticker';
+        el.className = `floating-sticker ${isLocked ? 'locked' : ''}`;
         el.style.left = `${stk.x || 80}px`;
         el.style.top = `${stk.y || 120}px`;
         el.style.width = `${stk.size || 140}px`;
@@ -1860,18 +1879,33 @@
 
         el.innerHTML = `
           <img src="${stk.url}" alt="sticker" draggable="false" />
-          <button class="sticker-delete-tag" title="Remove">&times;</button>
+          <div class="sticker-actions-overlay">
+            <button class="sticker-tag-btn lock-tag-btn ${isLocked ? 'active-lock' : ''}" title="${isLocked ? 'Unlock Position' : 'Lock/Fix Position'}">
+              ✓
+            </button>
+            ${!isLocked ? `<button class="sticker-tag-btn delete-tag-btn" title="Remove">&times;</button>` : ''}
+          </div>
         `;
 
-        el.querySelector('.sticker-delete-tag').addEventListener('click', async (e) => {
+        // Toggle Fix/Lock
+        el.querySelector('.lock-tag-btn').addEventListener('click', async (e) => {
           e.stopPropagation();
-          await remove(ref(db, `stickers/${stk.firebaseKey}`));
+          await set(ref(db, `stickers/${stk.firebaseKey}/locked`), !isLocked);
         });
 
-        // Dragging mechanic
+        // Delete (if unlocked)
+        const delBtn = el.querySelector('.delete-tag-btn');
+        if (delBtn) {
+          delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await remove(ref(db, `stickers/${stk.firebaseKey}`));
+          });
+        }
+
+        // Dragging mechanic (Disabled if locked)
         let startX, startY, origX, origY;
         el.addEventListener('mousedown', (e) => {
-          if (e.target.classList.contains('sticker-delete-tag')) return;
+          if (isLocked || e.target.closest('.sticker-actions-overlay')) return;
           startX = e.clientX;
           startY = e.clientY;
           origX = el.offsetLeft;
@@ -1909,22 +1943,32 @@
 
       stickersGrid.innerHTML = '';
       cachedStickers.forEach(stk => {
+        const isLocked = !!stk.locked;
         const card = document.createElement('div');
         card.className = 'sticker-grid-card';
         card.innerHTML = `
           <img src="${stk.url}" alt="sticker" />
           <div class="sticker-scale-control">
             <span>Size</span>
-            <input type="range" min="60" max="320" value="${stk.size || 140}" data-key="${stk.firebaseKey}" />
+            <input type="range" min="60" max="320" value="${stk.size || 140}" ${isLocked ? 'disabled' : ''} />
           </div>
-          <button class="nav-icon-btn del-stk-btn" data-key="${stk.firebaseKey}" title="Delete" style="align-self: flex-end; padding: 2px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
+          <div style="display: flex; gap: 8px; align-self: flex-end;">
+            <button class="nav-icon-btn lock-stk-btn" title="${isLocked ? 'Unlock' : 'Fix / Lock'}" style="padding: 2px; color: ${isLocked ? '#10b981' : 'var(--text-muted)'};">
+              ✓
+            </button>
+            <button class="nav-icon-btn del-stk-btn" title="Delete" style="padding: 2px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
         `;
 
         const slider = card.querySelector('input');
         slider.addEventListener('change', () => {
           set(ref(db, `stickers/${stk.firebaseKey}/size`), parseInt(slider.value));
+        });
+
+        card.querySelector('.lock-stk-btn').addEventListener('click', async () => {
+          await set(ref(db, `stickers/${stk.firebaseKey}/locked`), !isLocked);
         });
 
         card.querySelector('.del-stk-btn').addEventListener('click', async () => {
@@ -2166,7 +2210,7 @@
     stopBtn.addEventListener('click', finishSession);
     resetBtn.addEventListener('click', resetTimer);
 
-    // Global Key Handlers
+    // Global Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
       if (activeTag === 'input' || activeTag === 'textarea') {

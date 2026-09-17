@@ -192,18 +192,86 @@
       border-bottom-color: var(--border);
     }
 
-    /* Middle: Centered Timer */
+    /* Middle: Centered Timer Area */
     .timer-center {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       user-select: none;
+      gap: 16px;
     }
 
     .timer-display {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(3.8rem, 10vw, 6.5rem);
       letter-spacing: 0.12em;
+      color: var(--text);
+    }
+
+    /* Mini Video PIP Box in Timer */
+    .mini-pip-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .mini-pip-container.active {
+      display: flex;
+    }
+
+    .mini-pip-frame {
+      width: 240px;
+      height: 135px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #000;
+      position: relative;
+    }
+
+    .mini-pip-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .mini-pip-bar {
+      width: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .mini-pip-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 190px;
+    }
+
+    .mini-pip-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      border-radius: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .mini-pip-btn:hover {
       color: var(--text);
     }
 
@@ -460,6 +528,150 @@
     .dropdown-menu button.danger:hover {
       background: rgba(239, 68, 68, 0.1);
     }
+
+    /* Music Modal Styles */
+    .music-add-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .music-input-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .music-text-input {
+      flex: 1;
+      min-width: 200px;
+      background: #0d0f11;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .music-text-input:focus {
+      border-color: var(--accent);
+    }
+
+    .music-text-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .music-add-btn {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .music-add-btn:hover {
+      opacity: 0.88;
+    }
+
+    .music-list-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .music-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .music-item:hover {
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .music-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .music-item-title {
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-item-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .music-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .music-play-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .music-play-btn:hover {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .music-del-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+
+    .music-del-btn:hover {
+      color: var(--danger);
+    }
   </style>
 </head>
 <body>
@@ -504,9 +716,24 @@
     <input type="text" id="sessionDesc" class="session-input session-desc" placeholder="Add a short description..." autocomplete="off" />
   </header>
 
-  <!-- Middle: Centered Timer -->
+  <!-- Middle: Centered Timer with Mini Preview Window -->
   <main class="timer-center">
     <div class="timer-display" id="display">00:00:00</div>
+
+    <div class="mini-pip-container" id="miniPipContainer">
+      <div class="mini-pip-frame">
+        <div id="ytPlayerContainer"></div>
+      </div>
+      <div class="mini-pip-bar">
+        <span class="mini-pip-title" id="miniPipTitle">Now Playing</span>
+        <button class="mini-pip-btn" id="closePipBtn" title="Close Preview Player">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
   </main>
 
   <!-- Bottom: Timer Controls -->
@@ -544,15 +771,27 @@
     </div>
   </div>
 
-  <!-- Fullscreen Music Screen (UI Only) -->
+  <!-- Fullscreen Music Screen -->
   <div class="modal-fullscreen" id="musicModal">
     <div class="modal-shell">
       <div class="modal-header">
-        <h3>Music</h3>
+        <h3>Music & Audio</h3>
         <button class="close-btn" id="closeMusic" aria-label="Close Music">&times;</button>
       </div>
-      <div class="modal-content" style="display: flex; justify-content: center; align-items: center;">
-        <p style="font-size: 0.9rem; color: var(--text-muted); text-align: center;">Music page is open.</p>
+      <div class="modal-content">
+        <!-- Add Video Form -->
+        <form class="music-add-form" id="musicAddForm">
+          <div class="music-input-row">
+            <input type="text" id="musicTitleInput" class="music-text-input" placeholder="Title (e.g. Lofi beats / Ambient rain)" autocomplete="off" required />
+            <input type="text" id="musicUrlInput" class="music-text-input" placeholder="YouTube Video URL or Video ID" autocomplete="off" required />
+            <button type="submit" class="music-add-btn">Add Track</button>
+          </div>
+        </form>
+
+        <!-- Saved Music Tracks List -->
+        <div class="music-list-section">
+          <div id="musicContainer"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -575,8 +814,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const sessionsRef = ref(db, 'study_sessions');
+    const musicRef = ref(db, 'music');
 
     let cachedSessions = [];
+    let cachedTracks = [];
     let secondsElapsed = 0;
     let timerInterval = null;
 
@@ -593,6 +834,12 @@
     const todayTotalDisplay = document.getElementById('todayTotal');
     const liveClock = document.getElementById('liveClock');
 
+    // Mini Pip Box Elements
+    const miniPipContainer = document.getElementById('miniPipContainer');
+    const miniPipTitle = document.getElementById('miniPipTitle');
+    const ytPlayerContainer = document.getElementById('ytPlayerContainer');
+    const closePipBtn = document.getElementById('closePipBtn');
+
     // Modals
     const historyModal = document.getElementById('historyModal');
     const openHistory = document.getElementById('openHistory');
@@ -602,6 +849,10 @@
     const musicModal = document.getElementById('musicModal');
     const openMusic = document.getElementById('openMusic');
     const closeMusic = document.getElementById('closeMusic');
+    const musicAddForm = document.getElementById('musicAddForm');
+    const musicTitleInput = document.getElementById('musicTitleInput');
+    const musicUrlInput = document.getElementById('musicUrlInput');
+    const musicContainer = document.getElementById('musicContainer');
 
     function closeAllDropdowns() {
       document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
@@ -621,12 +872,141 @@
     });
 
     openMusic.addEventListener('click', () => {
+      renderMusic();
       musicModal.classList.add('open');
     });
 
     closeMusic.addEventListener('click', () => {
       musicModal.classList.remove('open');
     });
+
+    // Extract YouTube ID from link
+    function extractYouTubeID(url) {
+      if (!url) return null;
+      const clean = url.trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = clean.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // Play video in mini preview player
+    function playTrack(videoId, title) {
+      if (!videoId) return;
+      miniPipTitle.textContent = title || 'Now Playing';
+      ytPlayerContainer.innerHTML = `
+        <iframe 
+          src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" 
+          title="${title}" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      `;
+      miniPipContainer.classList.add('active');
+      musicModal.classList.remove('open');
+    }
+
+    closePipBtn.addEventListener('click', () => {
+      miniPipContainer.classList.remove('active');
+      ytPlayerContainer.innerHTML = '';
+    });
+
+    // Add Music Form Submission
+    musicAddForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = musicTitleInput.value.trim();
+      const rawUrl = musicUrlInput.value.trim();
+      const videoId = extractYouTubeID(rawUrl);
+
+      if (!videoId) {
+        alert('Please enter a valid YouTube video link or 11-character video ID.');
+        return;
+      }
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+
+      const trackData = {
+        title: title || 'Untitled Audio',
+        url: rawUrl,
+        videoId: videoId,
+        date: `${yyyy}-${mm}-${dd}`,
+        createdAt: Date.now()
+      };
+
+      const newTrackRef = push(musicRef);
+      await set(newTrackRef, trackData);
+
+      musicTitleInput.value = '';
+      musicUrlInput.value = '';
+    });
+
+    // Music Firebase Listener
+    onValue(musicRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        cachedTracks = Object.keys(data).map(key => ({
+          firebaseKey: key,
+          ...data[key]
+        })).sort((a, b) => b.createdAt - a.createdAt);
+      } else {
+        cachedTracks = [];
+      }
+      if (musicModal.classList.contains('open')) {
+        renderMusic();
+      }
+    });
+
+    function renderMusic() {
+      if (!cachedTracks.length) {
+        musicContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 36px 0;">No tracks saved yet. Add a link above!</p>';
+        return;
+      }
+
+      musicContainer.innerHTML = '';
+      cachedTracks.forEach(track => {
+        const item = document.createElement('div');
+        item.className = 'music-item';
+        item.innerHTML = `
+          <div class="music-item-info">
+            <span class="music-item-title">${track.title}</span>
+            <span class="music-item-date">Saved on ${track.date || 'Unknown date'}</span>
+          </div>
+          <div class="music-actions">
+            <button class="music-play-btn" data-video="${track.videoId}" data-title="${encodeURIComponent(track.title)}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Play
+            </button>
+            <button class="music-del-btn" data-key="${track.firebaseKey}" title="Delete track">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+        musicContainer.appendChild(item);
+      });
+
+      musicContainer.querySelectorAll('.music-play-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const vid = btn.dataset.video;
+          const title = decodeURIComponent(btn.dataset.title);
+          playTrack(vid, title);
+        });
+      });
+
+      musicContainer.querySelectorAll('.music-del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const key = btn.dataset.key;
+          if (confirm('Delete this track?')) {
+            await remove(ref(db, `music/${key}`));
+          }
+        });
+      });
+    }
 
     // Timer & Session Logic
     function formatTime(totalSeconds) {

@@ -260,11 +260,11 @@
       display: none;
       align-items: center;
       gap: 12px;
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 30px;
-      background: rgba(255, 255, 255, 0.02);
+      background: #141618;
       border: 1px solid var(--border);
-      max-width: 320px;
+      max-width: 360px;
     }
 
     .music-bar.active {
@@ -278,21 +278,22 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      padding: 0;
+      justify-content: center;
+      padding: 4px;
     }
 
     .music-bar-playpause svg {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
     }
 
     .music-bar-title {
-      font-size: 0.78rem;
-      color: var(--text-muted);
+      font-size: 0.8rem;
+      color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 220px;
+      max-width: 240px;
     }
 
     /* Fullscreen Modals */
@@ -320,7 +321,7 @@
     }
 
     .modal-header {
-      padding-bottom: 24px;
+      padding-bottom: 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
@@ -350,10 +351,11 @@
 
     /* Music Input Bar in Modal */
     .music-input-section {
-      padding-top: 20px;
+      padding: 16px 0;
       display: flex;
       gap: 12px;
       align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .music-input-section input {
@@ -390,13 +392,21 @@
       background: rgba(255, 255, 255, 0.04);
     }
 
+    /* Modal Internal Player Strip */
+    .modal-music-bar-wrap {
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
     /* Custom Scrollbar Container */
     .modal-content {
-      padding: 24px 16px 40px 0;
+      padding: 20px 16px 40px 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 28px;
       flex: 1;
       scrollbar-width: thin;
       scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -424,7 +434,7 @@
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       padding-bottom: 6px;
     }
@@ -433,9 +443,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
+      padding: 12px 10px;
+      border-radius: 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      position: relative;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .history-item:last-child {
@@ -446,9 +462,8 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-      max-width: 75%;
+      max-width: 80%;
       flex: 1;
-      cursor: pointer;
     }
 
     .history-item-title {
@@ -461,6 +476,7 @@
 
     .history-item-title.active-playing {
       color: #38bdf8;
+      font-weight: 500;
     }
 
     .history-item-desc {
@@ -548,15 +564,16 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
-    /* Off-screen minimal YouTube IFrame player */
+    /* Kept alive with 200x200 fixed position and low opacity so browser doesn't throttle background playback */
     #yt-hidden-player-wrap {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      top: -1000px;
-      left: -1000px;
-      opacity: 0.01;
+      position: fixed;
+      bottom: 4px;
+      right: 4px;
+      width: 200px;
+      height: 120px;
+      opacity: 0.001;
       pointer-events: none;
+      z-index: 1;
     }
   </style>
 </head>
@@ -609,13 +626,13 @@
 
   <!-- Bottom: Timer Controls & Mini Music Bar -->
   <div class="bottom-controls-wrap">
-    <!-- Quick Music Mini-Player -->
+    <!-- Quick Music Mini-Player (Main Page) -->
     <div class="music-bar" id="musicBar">
       <button class="music-bar-playpause" id="musicBarToggle" aria-label="Play/Pause Music">
-        <svg id="musicBarPlayIcon" viewBox="0 0 24 24" fill="currentColor">
+        <svg class="music-play-svg" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
-        <svg id="musicBarPauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+        <svg class="music-pause-svg" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
           <rect x="6" y="4" width="4" height="16"></rect>
           <rect x="14" y="4" width="4" height="16"></rect>
         </svg>
@@ -667,11 +684,28 @@
         <input type="text" id="ytUrlInput" placeholder="Paste YouTube link (e.g. https://youtu.be/...)" autocomplete="off" />
         <button id="addMusicBtn">Add Track</button>
       </div>
+
+      <!-- Player Bar visible inside Music modal -->
+      <div class="modal-music-bar-wrap">
+        <div class="music-bar" id="modalMusicBar">
+          <button class="music-bar-playpause" id="modalMusicBarToggle" aria-label="Play/Pause Music">
+            <svg class="music-play-svg" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <svg class="music-pause-svg" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </button>
+          <span class="music-bar-title" id="modalMusicBarTitle">No track playing</span>
+        </div>
+      </div>
+
       <div class="modal-content" id="musicContainer"></div>
     </div>
   </div>
 
-  <!-- Hidden Container for YouTube Iframe API -->
+  <!-- Container for YouTube Iframe API -->
   <div id="yt-hidden-player-wrap">
     <div id="ytplayer"></div>
   </div>
@@ -730,36 +764,45 @@
     const ytUrlInput = document.getElementById('ytUrlInput');
     const addMusicBtn = document.getElementById('addMusicBtn');
 
-    // Mini music bar
+    // Dual mini music bars (main screen + inside modal)
     const musicBar = document.getElementById('musicBar');
     const musicBarToggle = document.getElementById('musicBarToggle');
-    const musicBarPlayIcon = document.getElementById('musicBarPlayIcon');
-    const musicBarPauseIcon = document.getElementById('musicBarPauseIcon');
     const musicBarTitle = document.getElementById('musicBarTitle');
+
+    const modalMusicBar = document.getElementById('modalMusicBar');
+    const modalMusicBarToggle = document.getElementById('modalMusicBarToggle');
+    const modalMusicBarTitle = document.getElementById('modalMusicBarTitle');
 
     // YouTube Audio Player Handler
     let ytPlayer = null;
+    let ytPlayerReady = false;
     let activeTrack = null;
     let isMusicPlaying = false;
+    let pendingTrackToPlay = null;
 
     window.onYouTubeIframeAPIReady = function() {
       ytPlayer = new YT.Player('ytplayer', {
-        height: '100',
-        width: '100',
+        height: '120',
+        width: '200',
         playerVars: {
-          playsinline: 1,
+          autoplay: 0,
           controls: 0,
           disablekb: 1,
-          fs: 0
+          fs: 0,
+          playsinline: 1,
+          origin: window.location.origin
         },
         events: {
           onReady: (e) => {
-            e.target.setPlaybackQuality('small');
+            ytPlayerReady = true;
+            if (pendingTrackToPlay) {
+              playTrack(pendingTrackToPlay);
+              pendingTrackToPlay = null;
+            }
           },
           onStateChange: (e) => {
             if (e.data === YT.PlayerState.PLAYING) {
               isMusicPlaying = true;
-              e.target.setPlaybackQuality('small');
               updateMusicUI();
             } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
               isMusicPlaying = false;
@@ -773,12 +816,9 @@
     function extractVideoId(url) {
       if (!url) return null;
       const cleanUrl = url.trim();
-      
-      // Match 11-char ID directly if user pasted only the ID
       if (/^[a-zA-Z0-9_-]{11}$/.test(cleanUrl)) {
         return cleanUrl;
       }
-      
       const regExp = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
       const match = cleanUrl.match(regExp);
       return match ? match[1] : null;
@@ -786,15 +826,23 @@
 
     function playTrack(track) {
       activeTrack = track;
-      musicBar.classList.add('active');
-      musicBarTitle.textContent = `${track.title}`;
 
-      if (ytPlayer && ytPlayer.loadVideoById) {
-        ytPlayer.loadVideoById({
-          videoId: track.videoId,
-          suggestedQuality: 'small'
-        });
+      // Show both mini bars
+      musicBar.classList.add('active');
+      modalMusicBar.classList.add('active');
+      musicBarTitle.textContent = track.title;
+      modalMusicBarTitle.textContent = track.title;
+
+      if (!ytPlayerReady || !ytPlayer || !ytPlayer.loadVideoById) {
+        pendingTrackToPlay = track;
+        return;
       }
+
+      ytPlayer.loadVideoById({
+        videoId: track.videoId,
+        suggestedQuality: 'small'
+      });
+      ytPlayer.playVideo();
       renderMusic();
     }
 
@@ -808,19 +856,22 @@
     }
 
     function updateMusicUI() {
+      const playIcons = document.querySelectorAll('.music-play-svg');
+      const pauseIcons = document.querySelectorAll('.music-pause-svg');
+
       if (isMusicPlaying) {
-        musicBarPlayIcon.style.display = 'none';
-        musicBarPauseIcon.style.display = 'block';
+        playIcons.forEach(el => el.style.display = 'none');
+        pauseIcons.forEach(el => el.style.display = 'block');
       } else {
-        musicBarPlayIcon.style.display = 'block';
-        musicBarPauseIcon.style.display = 'none';
+        playIcons.forEach(el => el.style.display = 'block');
+        pauseIcons.forEach(el => el.style.display = 'none');
       }
       renderMusic();
     }
 
     musicBarToggle.addEventListener('click', toggleMusicPlayback);
+    modalMusicBarToggle.addEventListener('click', toggleMusicPlayback);
 
-    // Fast title fetch with timeout fallback
     async function fetchVideoTitle(videoId) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
@@ -845,11 +896,10 @@
       return Math.max(...numbers, 0) + 1;
     }
 
-    // Helper to ensure Firebase write doesn't hang forever
     function withTimeout(promise, ms = 8000) {
       return Promise.race([
         promise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Database operation timed out. Check network or Firebase security rules.')), ms))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase operation timed out. Verify your Realtime Database rules.')), ms))
       ]);
     }
 
@@ -859,7 +909,7 @@
 
       const videoId = extractVideoId(url);
       if (!videoId) {
-        alert('Invalid YouTube URL or ID. Please check the link and try again.');
+        alert('Invalid YouTube URL or Video ID');
         return;
       }
 
@@ -888,9 +938,11 @@
         await withTimeout(set(newRef, newTrack));
 
         ytUrlInput.value = '';
+        // Automatically play the added track immediately
+        playTrack({ firebaseKey: newRef.key, ...newTrack });
       } catch (err) {
         console.error('Failed to add track:', err);
-        alert(`Could not add track: ${err.message || 'Database error. Make sure your Firebase Realtime Database rules allow writes.'}`);
+        alert(err.message || 'Error writing to database.');
       } finally {
         addMusicBtn.disabled = false;
         addMusicBtn.textContent = 'Add Track';
@@ -916,8 +968,6 @@
       if (musicModal.classList.contains('open')) {
         renderMusic();
       }
-    }, (error) => {
-      console.error("Music listener error:", error);
     });
 
     function renderMusic() {
@@ -949,8 +999,9 @@
           const isCurrent = activeTrack && activeTrack.firebaseKey === track.firebaseKey;
           const row = document.createElement('div');
           row.className = 'history-item';
+          row.setAttribute('data-track-key', track.firebaseKey);
           row.innerHTML = `
-            <div class="history-item-meta" data-track-key="${track.firebaseKey}">
+            <div class="history-item-meta">
               <span class="history-item-title ${isCurrent ? 'active-playing' : ''}">
                 ${isCurrent && isMusicPlaying ? '▶ ' : ''}${track.title}
               </span>
@@ -971,8 +1022,9 @@
       });
 
       // Item click: Play track
-      musicContainer.querySelectorAll('.history-item-meta').forEach(el => {
-        el.addEventListener('click', () => {
+      musicContainer.querySelectorAll('.history-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('.menu-wrap')) return;
           const key = el.getAttribute('data-track-key');
           const track = cachedTracks.find(t => t.firebaseKey === key);
           if (track) playTrack(track);
@@ -996,10 +1048,11 @@
           e.stopPropagation();
           closeAllDropdowns();
           const key = btn.dataset.key;
-          if (confirm('Delete this track from music history?')) {
+          if (confirm('Delete this track?')) {
             if (activeTrack && activeTrack.firebaseKey === key) {
               if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
               musicBar.classList.remove('active');
+              modalMusicBar.classList.remove('active');
               activeTrack = null;
             }
             try {
@@ -1090,8 +1143,6 @@
       if (historyModal.classList.contains('open')) {
         renderHistory();
       }
-    }, (error) => {
-      console.error("Session listener error:", error);
     });
 
     function renderHistory() {

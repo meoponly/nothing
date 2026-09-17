@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pseudomation</title>
-  <!-- Pure Black SVG Clock Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -42,7 +41,6 @@
       overflow: hidden;
     }
 
-    /* Top Left: Today's Total */
     .today-reading {
       position: absolute;
       top: 32px;
@@ -59,7 +57,6 @@
       font-family: 'Share Tech Mono', monospace;
     }
 
-    /* Top Right: Actions Group */
     .top-right-actions {
       position: absolute;
       top: 28px;
@@ -88,7 +85,6 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
-    /* Bottom Right: Live Clock */
     .live-clock {
       position: absolute;
       bottom: 28px;
@@ -99,7 +95,6 @@
       z-index: 10;
     }
 
-    /* Left Middle: Reset Button */
     .edge-reset-btn {
       position: fixed;
       left: 16px;
@@ -131,7 +126,6 @@
       transform: translateY(-50%) scale(1.08);
     }
 
-    /* Top Center: Title & Description */
     .top-section {
       width: 100%;
       max-width: 480px;
@@ -192,7 +186,6 @@
       border-bottom-color: var(--border);
     }
 
-    /* Middle: Centered Timer */
     .timer-center {
       display: flex;
       justify-content: center;
@@ -207,7 +200,6 @@
       color: var(--text);
     }
 
-    /* Bottom: Controls & Persistent Mini Music Control */
     .bottom-controls-wrap {
       display: flex;
       flex-direction: column;
@@ -255,16 +247,17 @@
       border-color: var(--border);
     }
 
-    /* Compact Bottom Now-Playing Bar */
+    /* Main Screen Quick Music Bar */
     .music-bar {
       display: none;
       align-items: center;
       gap: 12px;
-      padding: 7px 16px;
+      padding: 6px 14px;
       border-radius: 30px;
       background: #141618;
       border: 1px solid var(--border);
       max-width: 360px;
+      cursor: pointer;
     }
 
     .music-bar.active {
@@ -278,13 +271,12 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 4px;
+      padding: 0;
     }
 
     .music-bar-playpause svg {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
     }
 
     .music-bar-title {
@@ -305,7 +297,7 @@
       z-index: 100;
       flex-direction: column;
       align-items: center;
-      padding: 40px 24px;
+      padding: 32px 24px;
     }
 
     .modal-fullscreen.open {
@@ -318,6 +310,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .modal-header {
@@ -349,13 +342,12 @@
       color: var(--text);
     }
 
-    /* Music Input Bar in Modal */
+    /* Modal Input Bar */
     .music-input-section {
-      padding: 16px 0;
+      padding-top: 20px;
       display: flex;
       gap: 12px;
       align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .music-input-section input {
@@ -392,21 +384,106 @@
       background: rgba(255, 255, 255, 0.04);
     }
 
-    /* Modal Internal Player Strip */
-    .modal-music-bar-wrap {
-      padding: 12px 0;
+    /* Complete Music Player Dock */
+    .player-dock {
+      margin-top: 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
       display: flex;
-      justify-content: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      flex-direction: column;
+      gap: 12px;
     }
 
-    /* Custom Scrollbar Container */
+    .player-dock-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .player-dock-title {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .player-dock-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .dock-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      border-radius: 50%;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    .dock-btn:hover {
+      color: #38bdf8;
+      transform: scale(1.1);
+    }
+
+    .dock-play-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .player-dock-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .time-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      min-width: 44px;
+    }
+
+    .progress-slider {
+      flex: 1;
+      accent-color: #38bdf8;
+      cursor: pointer;
+      height: 4px;
+    }
+
+    .volume-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .volume-slider {
+      width: 70px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 4px;
+    }
+
+    /* Track List */
     .modal-content {
-      padding: 20px 16px 40px 0;
+      padding: 18px 12px 24px 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 24px;
       flex: 1;
       scrollbar-width: thin;
       scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -416,17 +493,9 @@
       width: 5px;
     }
 
-    .modal-content::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
     .modal-content::-webkit-scrollbar-thumb {
       background: var(--scrollbar-thumb);
       border-radius: 4px;
-    }
-
-    .modal-content::-webkit-scrollbar-thumb:hover {
-      background: var(--scrollbar-hover);
     }
 
     .date-group h4 {
@@ -443,7 +512,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 10px;
+      padding: 10px 8px;
       border-radius: 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       cursor: pointer;
@@ -454,8 +523,9 @@
       background: rgba(255, 255, 255, 0.02);
     }
 
-    .history-item:last-child {
-      border-bottom: none;
+    .history-item.is-active {
+      background: rgba(56, 189, 248, 0.05);
+      border-color: rgba(56, 189, 248, 0.2);
     }
 
     .history-item-meta {
@@ -467,7 +537,7 @@
     }
 
     .history-item-title {
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       color: var(--text);
       display: flex;
       align-items: center;
@@ -479,24 +549,12 @@
       font-weight: 500;
     }
 
-    .history-item-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
     .history-item-right {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    .history-item-time {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 1rem;
-      color: var(--accent);
-    }
-
-    /* 3-Dots Dropdown Menu */
     .menu-wrap {
       position: relative;
     }
@@ -513,11 +571,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .menu-trigger:hover {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.05);
     }
 
     .dropdown-menu {
@@ -548,43 +601,36 @@
       font-size: 0.82rem;
       color: var(--text);
       cursor: pointer;
-      transition: background 0.15s ease;
       display: block;
-    }
-
-    .dropdown-menu button:hover {
-      background: rgba(255, 255, 255, 0.06);
     }
 
     .dropdown-menu button.danger {
       color: var(--danger);
     }
 
-    .dropdown-menu button.danger:hover {
-      background: rgba(239, 68, 68, 0.1);
-    }
-
-    /* Kept alive with 200x200 fixed position and low opacity so browser doesn't throttle background playback */
-    #yt-hidden-player-wrap {
+    /* Fully rendered, zero-obscured YouTube player canvas (docked off-viewport but active) */
+    #yt-dock-canvas {
       position: fixed;
-      bottom: 4px;
-      right: 4px;
-      width: 200px;
-      height: 120px;
-      opacity: 0.001;
-      pointer-events: none;
-      z-index: 1;
+      bottom: 12px;
+      right: 12px;
+      width: 240px;
+      height: 135px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      z-index: 5;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      transition: opacity 0.2s ease;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top-left: Today total -->
   <div class="today-reading">
     TODAY: <span id="todayTotal">00:00:00</span>
   </div>
 
-  <!-- Top-right: Music & History Icons -->
   <div class="top-right-actions">
     <button class="nav-icon-btn" id="openMusic" aria-label="Open Music" title="Background Music">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -602,7 +648,6 @@
     </button>
   </div>
 
-  <!-- Left Middle: Reset Button -->
   <button class="edge-reset-btn" id="resetBtn" aria-label="Reset Timer (R)" title="Reset Timer [R]">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -610,7 +655,6 @@
     </svg>
   </button>
 
-  <!-- Top Center: Name & Description -->
   <header class="top-section">
     <div class="title-row">
       <span class="session-badge" id="sessionBadge">S1:</span>
@@ -619,20 +663,18 @@
     <input type="text" id="sessionDesc" class="session-input session-desc" placeholder="Add a short description..." autocomplete="off" />
   </header>
 
-  <!-- Middle: Centered Timer -->
   <main class="timer-center">
     <div class="timer-display" id="display">00:00:00</div>
   </main>
 
-  <!-- Bottom: Timer Controls & Mini Music Bar -->
   <div class="bottom-controls-wrap">
-    <!-- Quick Music Mini-Player (Main Page) -->
-    <div class="music-bar" id="musicBar">
+    <!-- Bottom Quick Music Pill -->
+    <div class="music-bar" id="musicBar" title="Click to open Music view">
       <button class="music-bar-playpause" id="musicBarToggle" aria-label="Play/Pause Music">
-        <svg class="music-play-svg" viewBox="0 0 24 24" fill="currentColor">
+        <svg id="musicBarPlayIcon" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
-        <svg class="music-pause-svg" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+        <svg id="musicBarPauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
           <rect x="6" y="4" width="4" height="16"></rect>
           <rect x="14" y="4" width="4" height="16"></rect>
         </svg>
@@ -659,45 +701,57 @@
     </footer>
   </div>
 
-  <!-- Bottom Right: Live Clock -->
   <div class="live-clock" id="liveClock">--</div>
 
-  <!-- Fullscreen History Screen -->
+  <!-- Study History Modal -->
   <div class="modal-fullscreen" id="historyModal">
     <div class="modal-shell">
       <div class="modal-header">
         <h3>Study History</h3>
-        <button class="close-btn" id="closeHistory" aria-label="Close History">&times;</button>
+        <button class="close-btn" id="closeHistory">&times;</button>
       </div>
       <div class="modal-content" id="historyContainer"></div>
     </div>
   </div>
 
-  <!-- Fullscreen Music Screen -->
+  <!-- Background Music Modal -->
   <div class="modal-fullscreen" id="musicModal">
     <div class="modal-shell">
       <div class="modal-header">
         <h3>Background Music</h3>
-        <button class="close-btn" id="closeMusic" aria-label="Close Music">&times;</button>
+        <button class="close-btn" id="closeMusic">&times;</button>
       </div>
+
       <div class="music-input-section">
         <input type="text" id="ytUrlInput" placeholder="Paste YouTube link (e.g. https://youtu.be/...)" autocomplete="off" />
         <button id="addMusicBtn">Add Track</button>
       </div>
 
-      <!-- Player Bar visible inside Music modal -->
-      <div class="modal-music-bar-wrap">
-        <div class="music-bar" id="modalMusicBar">
-          <button class="music-bar-playpause" id="modalMusicBarToggle" aria-label="Play/Pause Music">
-            <svg class="music-play-svg" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            <svg class="music-pause-svg" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
-              <rect x="6" y="4" width="4" height="16"></rect>
-              <rect x="14" y="4" width="4" height="16"></rect>
-            </svg>
-          </button>
-          <span class="music-bar-title" id="modalMusicBarTitle">No track playing</span>
+      <!-- Docked Interactive Music Deck -->
+      <div class="player-dock" id="playerDock">
+        <div class="player-dock-top">
+          <div class="player-dock-title" id="dockTitle">Select a track below</div>
+          <div class="player-dock-controls">
+            <button class="dock-btn" id="prevTrackBtn" title="Previous Track">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3"></line></svg>
+            </button>
+            <button class="dock-btn dock-play-btn" id="dockPlayPauseBtn" title="Play/Pause">
+              <svg id="dockPlaySvg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <svg id="dockPauseSvg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            </button>
+            <button class="dock-btn" id="nextTrackBtn" title="Next Track">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="3"></line></svg>
+            </button>
+          </div>
+          <div class="volume-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" />
+          </div>
+        </div>
+        <div class="player-dock-progress">
+          <span class="time-label" id="currentTimeLabel">0:00</span>
+          <input type="range" class="progress-slider" id="progressSlider" min="0" max="100" value="0" />
+          <span class="time-label" id="durationLabel">0:00</span>
         </div>
       </div>
 
@@ -705,15 +759,11 @@
     </div>
   </div>
 
-  <!-- Container for YouTube Iframe API -->
-  <div id="yt-hidden-player-wrap">
-    <div id="ytplayer"></div>
+  <!-- Hardware-active YouTube Player -->
+  <div id="yt-dock-canvas">
+    <div id="yt-actual-iframe"></div>
   </div>
 
-  <!-- YouTube Iframe API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-
-  <!-- Firebase Modular SDK Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
@@ -764,61 +814,96 @@
     const ytUrlInput = document.getElementById('ytUrlInput');
     const addMusicBtn = document.getElementById('addMusicBtn');
 
-    // Dual mini music bars (main screen + inside modal)
+    // Player Controls
     const musicBar = document.getElementById('musicBar');
     const musicBarToggle = document.getElementById('musicBarToggle');
+    const musicBarPlayIcon = document.getElementById('musicBarPlayIcon');
+    const musicBarPauseIcon = document.getElementById('musicBarPauseIcon');
     const musicBarTitle = document.getElementById('musicBarTitle');
 
-    const modalMusicBar = document.getElementById('modalMusicBar');
-    const modalMusicBarToggle = document.getElementById('modalMusicBarToggle');
-    const modalMusicBarTitle = document.getElementById('modalMusicBarTitle');
+    const dockTitle = document.getElementById('dockTitle');
+    const dockPlayPauseBtn = document.getElementById('dockPlayPauseBtn');
+    const dockPlaySvg = document.getElementById('dockPlaySvg');
+    const dockPauseSvg = document.getElementById('dockPauseSvg');
+    const prevTrackBtn = document.getElementById('prevTrackBtn');
+    const nextTrackBtn = document.getElementById('nextTrackBtn');
+    const progressSlider = document.getElementById('progressSlider');
+    const currentTimeLabel = document.getElementById('currentTimeLabel');
+    const durationLabel = document.getElementById('durationLabel');
+    const volumeSlider = document.getElementById('volumeSlider');
 
-    // YouTube Audio Player Handler
     let ytPlayer = null;
-    let ytPlayerReady = false;
     let activeTrack = null;
     let isMusicPlaying = false;
-    let pendingTrackToPlay = null;
+    let isUserSeeking = false;
+    let progressTimer = null;
+
+    // Initialize YouTube IFrame Player safely
+    function loadYTApi() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
 
     window.onYouTubeIframeAPIReady = function() {
-      ytPlayer = new YT.Player('ytplayer', {
-        height: '120',
-        width: '200',
+      ytPlayer = new YT.Player('yt-actual-iframe', {
+        height: '135',
+        width: '240',
         playerVars: {
           autoplay: 0,
           controls: 0,
-          disablekb: 1,
-          fs: 0,
           playsinline: 1,
+          rel: 0,
+          enablejsapi: 1,
           origin: window.location.origin
         },
         events: {
-          onReady: (e) => {
-            ytPlayerReady = true;
-            if (pendingTrackToPlay) {
-              playTrack(pendingTrackToPlay);
-              pendingTrackToPlay = null;
-            }
+          onReady: () => {
+            clearInterval(progressTimer);
+            progressTimer = setInterval(trackPlaybackProgress, 500);
           },
           onStateChange: (e) => {
             if (e.data === YT.PlayerState.PLAYING) {
               isMusicPlaying = true;
-              updateMusicUI();
-            } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+              syncUIPlayingState(true);
+            } else if (e.data === YT.PlayerState.PAUSED) {
               isMusicPlaying = false;
-              updateMusicUI();
+              syncUIPlayingState(false);
+            } else if (e.data === YT.PlayerState.ENDED) {
+              isMusicPlaying = false;
+              syncUIPlayingState(false);
+              playNextTrack();
             }
           }
         }
       });
     };
 
+    loadYTApi();
+
+    function formatTimeCode(seconds) {
+      if (isNaN(seconds) || seconds < 0) return "0:00";
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function trackPlaybackProgress() {
+      if (!ytPlayer || !ytPlayer.getCurrentTime || isUserSeeking) return;
+      const cur = ytPlayer.getCurrentTime() || 0;
+      const dur = ytPlayer.getDuration() || 0;
+      currentTimeLabel.textContent = formatTimeCode(cur);
+      durationLabel.textContent = formatTimeCode(dur);
+      if (dur > 0) {
+        progressSlider.value = (cur / dur) * 100;
+      }
+    }
+
     function extractVideoId(url) {
       if (!url) return null;
       const cleanUrl = url.trim();
-      if (/^[a-zA-Z0-9_-]{11}$/.test(cleanUrl)) {
-        return cleanUrl;
-      }
+      if (/^[a-zA-Z0-9_-]{11}$/.test(cleanUrl)) return cleanUrl;
       const regExp = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
       const match = cleanUrl.match(regExp);
       return match ? match[1] : null;
@@ -826,28 +911,26 @@
 
     function playTrack(track) {
       activeTrack = track;
-
-      // Show both mini bars
       musicBar.classList.add('active');
-      modalMusicBar.classList.add('active');
       musicBarTitle.textContent = track.title;
-      modalMusicBarTitle.textContent = track.title;
+      dockTitle.textContent = track.title;
 
-      if (!ytPlayerReady || !ytPlayer || !ytPlayer.loadVideoById) {
-        pendingTrackToPlay = track;
-        return;
+      if (ytPlayer && ytPlayer.loadVideoById) {
+        ytPlayer.loadVideoById({
+          videoId: track.videoId,
+          suggestedQuality: 'small'
+        });
+        ytPlayer.playVideo();
       }
-
-      ytPlayer.loadVideoById({
-        videoId: track.videoId,
-        suggestedQuality: 'small'
-      });
-      ytPlayer.playVideo();
       renderMusic();
     }
 
     function toggleMusicPlayback() {
-      if (!ytPlayer || !activeTrack) return;
+      if (!ytPlayer) return;
+      if (!activeTrack && cachedTracks.length) {
+        playTrack(cachedTracks[0]);
+        return;
+      }
       if (isMusicPlaying) {
         ytPlayer.pauseVideo();
       } else {
@@ -855,33 +938,79 @@
       }
     }
 
-    function updateMusicUI() {
-      const playIcons = document.querySelectorAll('.music-play-svg');
-      const pauseIcons = document.querySelectorAll('.music-pause-svg');
-
-      if (isMusicPlaying) {
-        playIcons.forEach(el => el.style.display = 'none');
-        pauseIcons.forEach(el => el.style.display = 'block');
+    function syncUIPlayingState(playing) {
+      if (playing) {
+        musicBarPlayIcon.style.display = 'none';
+        musicBarPauseIcon.style.display = 'block';
+        dockPlaySvg.style.display = 'none';
+        dockPauseSvg.style.display = 'block';
       } else {
-        playIcons.forEach(el => el.style.display = 'block');
-        pauseIcons.forEach(el => el.style.display = 'none');
+        musicBarPlayIcon.style.display = 'block';
+        musicBarPauseIcon.style.display = 'none';
+        dockPlaySvg.style.display = 'block';
+        dockPauseSvg.style.display = 'none';
       }
       renderMusic();
     }
 
-    musicBarToggle.addEventListener('click', toggleMusicPlayback);
-    modalMusicBarToggle.addEventListener('click', toggleMusicPlayback);
+    function playNextTrack() {
+      if (!cachedTracks.length || !activeTrack) return;
+      const currentIndex = cachedTracks.findIndex(t => t.firebaseKey === activeTrack.firebaseKey);
+      if (currentIndex !== -1 && currentIndex < cachedTracks.length - 1) {
+        playTrack(cachedTracks[currentIndex + 1]);
+      } else {
+        playTrack(cachedTracks[0]);
+      }
+    }
+
+    function playPrevTrack() {
+      if (!cachedTracks.length || !activeTrack) return;
+      const currentIndex = cachedTracks.findIndex(t => t.firebaseKey === activeTrack.firebaseKey);
+      if (currentIndex > 0) {
+        playTrack(cachedTracks[currentIndex - 1]);
+      } else {
+        playTrack(cachedTracks[cachedTracks.length - 1]);
+      }
+    }
+
+    musicBarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMusicPlayback();
+    });
+
+    musicBar.addEventListener('click', () => {
+      renderMusic();
+      musicModal.classList.add('open');
+    });
+
+    dockPlayPauseBtn.addEventListener('click', toggleMusicPlayback);
+    nextTrackBtn.addEventListener('click', playNextTrack);
+    prevTrackBtn.addEventListener('click', playPrevTrack);
+
+    progressSlider.addEventListener('mousedown', () => { isUserSeeking = true; });
+    progressSlider.addEventListener('mouseup', () => {
+      if (!ytPlayer || !ytPlayer.getDuration) return;
+      const dur = ytPlayer.getDuration();
+      const targetTime = (progressSlider.value / 100) * dur;
+      ytPlayer.seekTo(targetTime, true);
+      isUserSeeking = false;
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+      if (ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(e.target.value);
+      }
+    });
 
     async function fetchVideoTitle(videoId) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
-
       try {
         const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, {
           signal: controller.signal
         });
         clearTimeout(timeoutId);
-        if (!res.ok) throw new Error('Fetch failed');
+        if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         return data.title || `Track (${videoId})`;
       } catch {
@@ -896,20 +1025,13 @@
       return Math.max(...numbers, 0) + 1;
     }
 
-    function withTimeout(promise, ms = 8000) {
-      return Promise.race([
-        promise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase operation timed out. Verify your Realtime Database rules.')), ms))
-      ]);
-    }
-
     async function handleAddMusic() {
       const url = ytUrlInput.value.trim();
       if (!url) return;
 
       const videoId = extractVideoId(url);
       if (!videoId) {
-        alert('Invalid YouTube URL or Video ID');
+        alert('Invalid YouTube URL or ID');
         return;
       }
 
@@ -935,14 +1057,12 @@
         };
 
         const newRef = push(musicRef);
-        await withTimeout(set(newRef, newTrack));
+        await set(newRef, newTrack);
 
         ytUrlInput.value = '';
-        // Automatically play the added track immediately
         playTrack({ firebaseKey: newRef.key, ...newTrack });
       } catch (err) {
-        console.error('Failed to add track:', err);
-        alert(err.message || 'Error writing to database.');
+        alert('Could not save track: ' + err.message);
       } finally {
         addMusicBtn.disabled = false;
         addMusicBtn.textContent = 'Add Track';
@@ -954,7 +1074,6 @@
       if (e.key === 'Enter') handleAddMusic();
     });
 
-    // Realtime Database Sync for Music
     onValue(musicRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -972,7 +1091,7 @@
 
     function renderMusic() {
       if (!cachedTracks.length) {
-        musicContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 48px 0;">No music added yet. Paste a link above to play.</p>';
+        musicContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 40px 0;">No tracks added yet.</p>';
         return;
       }
 
@@ -998,17 +1117,16 @@
         grouped[date].forEach(track => {
           const isCurrent = activeTrack && activeTrack.firebaseKey === track.firebaseKey;
           const row = document.createElement('div');
-          row.className = 'history-item';
-          row.setAttribute('data-track-key', track.firebaseKey);
+          row.className = `history-item ${isCurrent ? 'is-active' : ''}`;
           row.innerHTML = `
-            <div class="history-item-meta">
+            <div class="history-item-meta" data-track-key="${track.firebaseKey}">
               <span class="history-item-title ${isCurrent ? 'active-playing' : ''}">
                 ${isCurrent && isMusicPlaying ? '▶ ' : ''}${track.title}
               </span>
             </div>
             <div class="history-item-right">
               <div class="menu-wrap">
-                <button class="menu-trigger" data-key="${track.firebaseKey}" aria-label="Options">&#8942;</button>
+                <button class="menu-trigger" data-key="${track.firebaseKey}">&#8942;</button>
                 <div class="dropdown-menu" id="track-menu-${track.firebaseKey}">
                   <button class="danger delete-track-action" data-key="${track.firebaseKey}">Delete</button>
                 </div>
@@ -1021,17 +1139,14 @@
         musicContainer.appendChild(groupEl);
       });
 
-      // Item click: Play track
-      musicContainer.querySelectorAll('.history-item').forEach(el => {
-        el.addEventListener('click', (e) => {
-          if (e.target.closest('.menu-wrap')) return;
+      musicContainer.querySelectorAll('.history-item-meta').forEach(el => {
+        el.addEventListener('click', () => {
           const key = el.getAttribute('data-track-key');
           const track = cachedTracks.find(t => t.firebaseKey === key);
           if (track) playTrack(track);
         });
       });
 
-      // Dropdown toggle
       musicContainer.querySelectorAll('.menu-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1042,7 +1157,6 @@
         });
       });
 
-      // Delete action
       musicContainer.querySelectorAll('.delete-track-action').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -1052,20 +1166,16 @@
             if (activeTrack && activeTrack.firebaseKey === key) {
               if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
               musicBar.classList.remove('active');
-              modalMusicBar.classList.remove('active');
               activeTrack = null;
+              dockTitle.textContent = "Select a track below";
             }
-            try {
-              await remove(ref(db, `music_tracks/${key}`));
-            } catch (err) {
-              alert('Failed to delete track: ' + err.message);
-            }
+            await remove(ref(db, `music_tracks/${key}`));
           }
         });
       });
     }
 
-    // Timer & Session Logic
+    // Timer Logic
     function formatTime(totalSeconds) {
       const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
       const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
@@ -1080,8 +1190,7 @@
     }
 
     function updateSessionBadge() {
-      const nextNum = getNextSessionNumber();
-      sessionBadge.textContent = `S${nextNum}:`;
+      sessionBadge.textContent = `S${getNextSessionNumber()}:`;
     }
 
     function updateTodayTotal() {
@@ -1094,16 +1203,7 @@
 
     function updateLiveClock() {
       const now = new Date();
-      const dateStr = now.toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric'
-      });
-      const timeStr = now.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      liveClock.textContent = `${dateStr} · ${timeStr}`;
+      liveClock.textContent = `${now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
     }
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
@@ -1127,7 +1227,6 @@
       });
     }
 
-    // Sessions Firebase Listener
     onValue(sessionsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -1147,7 +1246,7 @@
 
     function renderHistory() {
       if (!cachedSessions.length) {
-        historyContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 48px 0;">No sessions recorded yet.</p>';
+        historyContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 40px 0;">No sessions recorded yet.</p>';
         return;
       }
 
@@ -1161,14 +1260,7 @@
       Object.keys(grouped).forEach(date => {
         const groupEl = document.createElement('div');
         groupEl.className = 'date-group';
-
-        const dateLabel = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-
-        groupEl.innerHTML = `<h4>${dateLabel}</h4>`;
+        groupEl.innerHTML = `<h4>${new Date(date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</h4>`;
 
         grouped[date].forEach(item => {
           const row = document.createElement('div');
@@ -1179,9 +1271,9 @@
               ${item.desc ? `<span class="history-item-desc">${item.desc}</span>` : ''}
             </div>
             <div class="history-item-right">
-              <div class="history-item-time">${formatTime(item.duration)}</div>
+              <div class="history-item-time" style="font-family: 'Share Tech Mono', monospace; color: var(--accent);">${formatTime(item.duration)}</div>
               <div class="menu-wrap">
-                <button class="menu-trigger" data-key="${item.firebaseKey}" aria-label="Options">&#8942;</button>
+                <button class="menu-trigger" data-key="${item.firebaseKey}">&#8942;</button>
                 <div class="dropdown-menu" id="session-menu-${item.firebaseKey}">
                   <button class="danger delete-session-action" data-key="${item.firebaseKey}">Delete</button>
                 </div>
@@ -1194,7 +1286,6 @@
         historyContainer.appendChild(groupEl);
       });
 
-      // Dropdown toggle
       historyContainer.querySelectorAll('.menu-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1205,18 +1296,12 @@
         });
       });
 
-      // Session Delete Action
       historyContainer.querySelectorAll('.delete-session-action').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
           closeAllDropdowns();
-          const key = btn.dataset.key;
           if (confirm('Delete this study session record?')) {
-            try {
-              await remove(ref(db, `study_sessions/${key}`));
-            } catch (err) {
-              alert('Failed to delete session: ' + err.message);
-            }
+            await remove(ref(db, `study_sessions/${btn.dataset.key}`));
           }
         });
       });
@@ -1262,13 +1347,7 @@
           createdAt: Date.now()
         };
 
-        try {
-          const newSessionRef = push(sessionsRef);
-          await withTimeout(set(newSessionRef, sessionData));
-        } catch (err) {
-          console.error('Failed to save session:', err);
-          alert('Could not save session to database: ' + err.message);
-        }
+        await set(push(sessionsRef), sessionData);
 
         secondsElapsed = 0;
         display.textContent = '00:00:00';
@@ -1288,21 +1367,10 @@
       stopBtn.disabled = true;
     }
 
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
-        }
-      }
-    }
-
     playPauseBtn.addEventListener('click', toggleTimer);
     stopBtn.addEventListener('click', finishSession);
     resetBtn.addEventListener('click', resetTimer);
 
-    // Modal navigation
     openHistory.addEventListener('click', () => {
       renderHistory();
       historyModal.classList.add('open');
@@ -1323,7 +1391,6 @@
       closeAllDropdowns();
     });
 
-    // Global Key Handlers
     window.addEventListener('keydown', (e) => {
       const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
       if (activeTag === 'input' || activeTag === 'textarea') {
@@ -1344,9 +1411,6 @@
       } else if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
         resetTimer();
-      } else if (e.key === 'f' || e.key === 'F') {
-        e.preventDefault();
-        toggleFullscreen();
       } else if (e.key === 'm' || e.key === 'M') {
         e.preventDefault();
         toggleMusicPlayback();

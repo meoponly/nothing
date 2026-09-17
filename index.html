@@ -208,7 +208,7 @@
       color: var(--text);
     }
 
-    /* Right Middle Preview Player (Completely Cropping Header, Title & UI) */
+    /* Right Middle Preview Player (Cropping Header & Clutter) */
     .mini-pip-container {
       display: none;
       position: fixed;
@@ -245,7 +245,6 @@
       overflow: hidden;
     }
 
-    /* Aggressive crop to cut away YouTube title bar and top overlay */
     .mini-pip-frame iframe {
       position: absolute;
       top: -85px;
@@ -257,7 +256,6 @@
       pointer-events: none;
     }
 
-    /* Dynamic Top Mask that completely conceals any persistent YouTube headers */
     .pip-top-mask {
       position: absolute;
       top: 0;
@@ -269,7 +267,6 @@
       z-index: 6;
     }
 
-    /* Anti-Clutter Mask: Hides native pause icon & buffering indicators */
     .pip-obscure-mask {
       position: absolute;
       inset: 0;
@@ -284,7 +281,6 @@
       opacity: 0.94;
     }
 
-    /* Hover Overlay (Center Play/Pause Toggle Disc) */
     .mini-pip-overlay {
       position: absolute;
       inset: 0;
@@ -738,6 +734,7 @@
       font-family: 'Share Tech Mono', monospace;
       font-size: 0.76rem;
       color: var(--text-muted);
+      min-width: 38px;
     }
 
     .music-list-section {
@@ -746,7 +743,7 @@
       gap: 24px;
     }
 
-    /* Central Floating Add Track Dialog */
+    /* Central Floating Modal for Adding YouTube Video */
     .floating-dialog-backdrop {
       display: none;
       position: fixed;
@@ -1200,7 +1197,7 @@
       panelTrackTitle.textContent = currentTrackTitle;
       panelStatus.textContent = 'BUFFERING';
 
-      // Retrieve saved progress for this video
+      // Restore saved progress for this track
       const savedTime = parseFloat(localStorage.getItem(`yt_progress_${videoId}`)) || 0;
       currentTime = savedTime;
       panelCurrTime.textContent = formatSec(currentTime);
@@ -1209,8 +1206,8 @@
       musicModal.classList.remove('open');
       pipMask.classList.add('blocked');
 
-      // Add start parameter to restore previous video progress
-      const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&cc_load_policy=0&iv_load_policy=3&start=${Math.floor(savedTime)}`;
+      const origin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : 'https://www.youtube.com';
+      const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&cc_load_policy=0&iv_load_policy=3&start=${Math.floor(savedTime)}&origin=${encodeURIComponent(origin)}`;
 
       ytPlayerContainer.innerHTML = `
         <iframe 
@@ -1223,8 +1220,8 @@
 
       const iframe = document.getElementById('yt-direct-iframe');
       iframe.addEventListener('load', () => {
-        // Initial handshake to start listening to player delivery ticks
-        sendYTCommand('listening');
+        // Send initial handshakes to YouTube iframe
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
         sendYTCommand('unloadModule', ['captions']);
         sendYTCommand('unloadModule', ['cc']);
         sendYTCommand('setOption', ['captions', 'track', {}]);
@@ -1274,27 +1271,24 @@
       panelPauseIcon.style.display = playing ? 'block' : 'none';
     }
 
-    // Bidirectional postMessage Listener (Fixes seekbar, timer, and state events)
+    // Bidirectional postMessage Listener (Accurate Seek, Duration, & Time Sync)
     window.addEventListener('message', (event) => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (!data) return;
 
-        // Player ready event
         if (data.event === 'onReady') {
-          sendYTCommand('listening');
-          if (currentTime > 0) {
-            sendYTCommand('seekTo', [currentTime, true]);
+          const iframe = document.getElementById('yt-direct-iframe');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
           }
         }
 
-        // Live playback info delivery
         if (data.event === 'infoDelivery' && data.info) {
           if (typeof data.info.currentTime === 'number') {
             currentTime = data.info.currentTime;
             panelCurrTime.textContent = formatSec(currentTime);
 
-            // Remember playback progress in localStorage
             if (currentVideoId && currentTime > 1) {
               localStorage.setItem(`yt_progress_${currentVideoId}`, currentTime);
             }
@@ -1306,11 +1300,12 @@
           if (totalDuration > 0 && !isSeeking) {
             panelSeekBar.value = (currentTime / totalDuration) * 100;
           }
-          if (data.info.playerState === 1) { // Playing
+          if (data.info.playerState === 1) {
             updatePlayerUIState(true);
-          } else if (data.info.playerState === 2) { // Paused
+            sendYTCommand('unloadModule', ['captions']);
+          } else if (data.info.playerState === 2) {
             updatePlayerUIState(false);
-          } else if (data.info.playerState === 0) { // Ended
+          } else if (data.info.playerState === 0) {
             if (isLooping) {
               sendYTCommand('seekTo', [0, true]);
               sendYTCommand('playVideo');
@@ -1326,14 +1321,18 @@
     function startTimerSync() {
       clearInterval(syncInterval);
       syncInterval = setInterval(() => {
-        if (isPlaying) {
-          sendYTCommand('listening');
+        const iframe = document.getElementById('yt-direct-iframe');
+        if (iframe && iframe.contentWindow) {
+          // Both listening handshake and direct delivery triggers
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'getCurrentTime' }), '*');
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'getDuration' }), '*');
         }
       }, 500);
     }
 
     function formatSec(sec) {
-      const s = Math.floor(sec);
+      const s = Math.floor(sec || 0);
       const m = Math.floor(s / 60);
       const remain = s % 60;
       return `${String(m).padStart(2, '0')}:${String(remain).padStart(2, '0')}`;
@@ -1406,7 +1405,7 @@
       sendYTCommand('seekTo', [target, true]);
     });
 
-    // Seek bar drag handling
+    // Seek bar drag & click handling
     panelSeekBar.addEventListener('mousedown', () => { isSeeking = true; });
     panelSeekBar.addEventListener('touchstart', () => { isSeeking = true; });
 
@@ -1421,6 +1420,7 @@
       if (totalDuration > 0) {
         const target = (panelSeekBar.value / 100) * totalDuration;
         sendYTCommand('seekTo', [target, true]);
+        currentTime = target;
       }
       isSeeking = false;
     });

@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pseudomation</title>
-  <!-- Pure Black SVG Clock Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -209,25 +208,34 @@
       color: var(--text);
     }
 
-    /* Right Middle Fixed Preview Player (Pure video & hover button) */
+    /* Right Middle Fixed Preview Player (Low-Intensity Minimal Aesthetic) */
     .mini-pip-container {
       display: none;
       position: fixed;
       right: 24px;
       top: 50%;
       transform: translateY(-50%);
-      width: 220px;
-      height: 124px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      width: 200px;
+      height: 112px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
       overflow: hidden;
       background: #000;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      opacity: 0.38;
+      filter: grayscale(18%);
+      transition: opacity 0.3s ease, border-color 0.3s ease, filter 0.3s ease;
       z-index: 40;
     }
 
     .mini-pip-container.active {
       display: block;
+    }
+
+    .mini-pip-container:hover {
+      opacity: 1;
+      filter: grayscale(0%);
+      border-color: var(--border);
     }
 
     .mini-pip-frame {
@@ -237,17 +245,18 @@
     }
 
     .mini-pip-frame iframe {
-      width: 100%;
-      height: 100%;
+      width: 100% !important;
+      height: 100% !important;
       border: none;
       display: block;
       pointer-events: none;
     }
 
+    /* Hover Overlay (Single Centered Play/Pause Button) */
     .mini-pip-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.38);
       opacity: 0;
       transition: opacity 0.2s ease;
       display: flex;
@@ -262,46 +271,47 @@
     }
 
     .pip-center-toggle {
-      width: 44px;
-      height: 44px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: rgba(20, 22, 24, 0.85);
-      border: 1px solid var(--border);
-      color: #fff;
+      background: rgba(18, 20, 23, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e1e4ea;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
       transition: transform 0.15s ease, background 0.15s ease;
     }
 
     .pip-center-toggle:hover {
-      transform: scale(1.08);
-      background: rgba(30, 34, 38, 0.95);
+      transform: scale(1.06);
+      background: rgba(28, 31, 35, 0.95);
       border-color: var(--accent);
     }
 
     .mini-pip-close {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      width: 20px;
-      height: 20px;
+      top: 5px;
+      right: 5px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background 0.2s ease, border-color 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease;
       z-index: 20;
     }
 
     .mini-pip-close:hover {
       background: var(--danger);
       border-color: var(--danger);
+      color: #fff;
     }
 
     /* Bottom: Controls */
@@ -768,7 +778,7 @@
     <div class="timer-display" id="display">00:00:00</div>
   </main>
 
-  <!-- Outer Right Edge Mini Preview Player (No UI except hover Play/Pause) -->
+  <!-- Outer Right Edge Mini Preview Player (Low-Intensity Aesthetic) -->
   <aside class="mini-pip-container" id="miniPipContainer">
     <button class="mini-pip-close" id="closePipBtn" title="Close Preview Player">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -778,10 +788,10 @@
     </button>
     <div class="mini-pip-overlay" id="pipOverlay">
       <div class="pip-center-toggle" id="pipPlayPauseBtn" title="Play / Pause">
-        <svg id="pipPlayIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <svg id="pipPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
-        <svg id="pipPauseIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+        <svg id="pipPauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
           <rect x="6" y="4" width="4" height="16"></rect>
           <rect x="14" y="4" width="4" height="16"></rect>
         </svg>
@@ -925,7 +935,7 @@
     let secondsElapsed = 0;
     let timerInterval = null;
 
-    // Player State (Client-Side Resilient postMessage API)
+    // Player State
     let isPlaying = false;
     let isLooping = false;
     let isMuted = false;
@@ -1021,7 +1031,6 @@
       return match ? match[1] : null;
     }
 
-    // Auto-fetch YouTube title via noembed
     async function fetchYouTubeTitle(videoId) {
       try {
         const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
@@ -1032,7 +1041,6 @@
       }
     }
 
-    // PostMessage YouTube Command Dispatcher
     function sendYTCommand(func, args = []) {
       const iframe = document.getElementById('yt-direct-iframe');
       if (iframe && iframe.contentWindow) {
@@ -1044,7 +1052,6 @@
       }
     }
 
-    // Embed Video and listen to state via postMessage
     function playTrack(videoId, title) {
       currentVideoId = videoId;
       currentTrackTitle = title || 'Audio Track';
@@ -1054,8 +1061,8 @@
       miniPipContainer.classList.add('active');
       musicModal.classList.remove('open');
 
-      const origin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : '*';
-      const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&origin=${encodeURIComponent(origin)}`;
+      // Embedded URL strictly suppressing captions (cc_load_policy=0, iv_load_policy=3, hl=en)
+      const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&cc_load_policy=0&iv_load_policy=3`;
 
       ytPlayerContainer.innerHTML = `
         <iframe 
@@ -1065,6 +1072,14 @@
           allowfullscreen>
         </iframe>
       `;
+
+      // Disable and unload captions via postMessage when frame loads
+      const iframe = document.getElementById('yt-direct-iframe');
+      iframe.addEventListener('load', () => {
+        sendYTCommand('unloadModule', ['captions']);
+        sendYTCommand('unloadModule', ['cc']);
+        sendYTCommand('setOption', ['captions', 'track', {}]);
+      });
 
       updatePlayerUIState(true);
       startTimerSync();
@@ -1091,7 +1106,6 @@
       panelPauseIcon.style.display = playing ? 'block' : 'none';
     }
 
-    // Listen to YouTube postMessage events
     window.addEventListener('message', (event) => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
@@ -1111,6 +1125,9 @@
           }
           if (data.info.playerState === 1) { // Playing
             updatePlayerUIState(true);
+            // Re-enforce captions suppression upon playback start
+            sendYTCommand('unloadModule', ['captions']);
+            sendYTCommand('setOption', ['captions', 'track', {}]);
           } else if (data.info.playerState === 2) { // Paused
             updatePlayerUIState(false);
           } else if (data.info.playerState === 0) { // Ended
@@ -1141,7 +1158,6 @@
       return `${String(m).padStart(2, '0')}:${String(remain).padStart(2, '0')}`;
     }
 
-    // Mini Pip Interactions
     pipPlayPauseBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       togglePlayback();
@@ -1161,7 +1177,6 @@
       panelStatus.textContent = 'IDLE';
     });
 
-    // Panel Controls
     panelPlayPauseBtn.addEventListener('click', togglePlayback);
 
     panelLoopBtn.addEventListener('click', () => {
@@ -1200,7 +1215,6 @@
       }
     });
 
-    // Add Music Form Submission
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawUrl = musicUrlInput.value.trim();
@@ -1243,7 +1257,6 @@
       }
     });
 
-    // Music Firebase Listener
     onValue(musicRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -1261,7 +1274,6 @@
       console.warn('Music listener warning:', err.message);
     });
 
-    // Render Music with Date Separations & S1, S2 Numbering
     function renderMusic() {
       if (!cachedTracks.length) {
         musicContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 36px 0;">No tracks saved yet. Add a link above!</p>';
@@ -1397,7 +1409,6 @@
       }
     }
 
-    // Sessions Firebase Listener
     onValue(sessionsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {

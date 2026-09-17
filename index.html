@@ -208,7 +208,7 @@
       color: var(--text);
     }
 
-    /* Right Middle Fixed Preview Player (Low-Intensity Minimal Aesthetic) */
+    /* Right Middle Fixed Preview Player (Pure Minimalist, Auto-Crop Overlays) */
     .mini-pip-container {
       display: none;
       position: fixed;
@@ -242,11 +242,16 @@
       width: 100%;
       height: 100%;
       position: relative;
+      overflow: hidden;
     }
 
+    /* Zoomed and cropped iframe to completely hide YouTube title, avatar & logo watermark */
     .mini-pip-frame iframe {
-      width: 100% !important;
-      height: 100% !important;
+      position: absolute;
+      top: -38%;
+      left: -20%;
+      width: 140% !important;
+      height: 176% !important;
       border: none;
       display: block;
       pointer-events: none;
@@ -680,7 +685,7 @@
       color: var(--text-muted);
     }
 
-    /* Add Music URL Form */
+    /* Add Music URL / Video ID Form */
     .music-add-form {
       display: flex;
       gap: 12px;
@@ -778,7 +783,7 @@
     <div class="timer-display" id="display">00:00:00</div>
   </main>
 
-  <!-- Outer Right Edge Mini Preview Player (Low-Intensity Aesthetic) -->
+  <!-- Outer Right Edge Mini Preview Player (Pure video & hover button) -->
   <aside class="mini-pip-container" id="miniPipContainer">
     <button class="mini-pip-close" id="closePipBtn" title="Close Preview Player">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -900,7 +905,7 @@
 
         <!-- Add Video Form -->
         <form class="music-add-form" id="musicAddForm">
-          <input type="text" id="musicUrlInput" class="music-url-input" placeholder="Paste YouTube link or Video ID (Title is automatically retrieved)..." autocomplete="off" required />
+          <input type="text" id="musicUrlInput" class="music-url-input" placeholder="Paste YouTube link OR 11-char Video ID (e.g. lTRiuFIWV54)..." autocomplete="off" required />
           <button type="submit" class="music-add-btn" id="musicSubmitBtn">Add Track</button>
         </form>
 
@@ -1022,9 +1027,10 @@
       musicModal.classList.remove('open');
     });
 
-    function extractYouTubeID(url) {
-      if (!url) return null;
-      const clean = url.trim();
+    // Flexible YouTube Video ID Extractor: Accepts standard links, short links, or direct IDs
+    function extractYouTubeID(input) {
+      if (!input) return null;
+      const clean = input.trim();
       if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
       const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
       const match = clean.match(regExp);
@@ -1061,7 +1067,7 @@
       miniPipContainer.classList.add('active');
       musicModal.classList.remove('open');
 
-      // Embedded URL strictly suppressing captions (cc_load_policy=0, iv_load_policy=3, hl=en)
+      // Embed parameters disable controls, annotations, captions, and brand links
       const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&cc_load_policy=0&iv_load_policy=3`;
 
       ytPlayerContainer.innerHTML = `
@@ -1073,7 +1079,7 @@
         </iframe>
       `;
 
-      // Disable and unload captions via postMessage when frame loads
+      // Strictly clear captions
       const iframe = document.getElementById('yt-direct-iframe');
       iframe.addEventListener('load', () => {
         sendYTCommand('unloadModule', ['captions']);
@@ -1125,7 +1131,6 @@
           }
           if (data.info.playerState === 1) { // Playing
             updatePlayerUIState(true);
-            // Re-enforce captions suppression upon playback start
             sendYTCommand('unloadModule', ['captions']);
             sendYTCommand('setOption', ['captions', 'track', {}]);
           } else if (data.info.playerState === 2) { // Paused
@@ -1217,8 +1222,8 @@
 
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const rawUrl = musicUrlInput.value.trim();
-      const videoId = extractYouTubeID(rawUrl);
+      const rawInput = musicUrlInput.value.trim();
+      const videoId = extractYouTubeID(rawInput);
 
       if (!videoId) {
         alert('Please enter a valid YouTube video link or 11-character video ID.');
@@ -1238,7 +1243,7 @@
 
       const trackData = {
         title: title,
-        url: rawUrl,
+        url: rawInput,
         videoId: videoId,
         date: `${yyyy}-${mm}-${dd}`,
         createdAt: Date.now()
@@ -1276,7 +1281,7 @@
 
     function renderMusic() {
       if (!cachedTracks.length) {
-        musicContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 36px 0;">No tracks saved yet. Add a link above!</p>';
+        musicContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 36px 0;">No tracks saved yet. Add a link or ID above!</p>';
         return;
       }
 

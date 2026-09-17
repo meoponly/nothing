@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     :root {
       --bg: #0c0d0e;
@@ -209,70 +211,62 @@
       color: var(--text);
     }
 
-    /* Mini Video PIP Box in Timer */
+    /* Pure Preview PIP Container */
     .mini-pip-container {
       display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      background: var(--card-bg);
+      position: relative;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
     }
 
     .mini-pip-container.active {
-      display: flex;
+      display: block;
     }
 
     .mini-pip-frame {
-      width: 240px;
-      height: 135px;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #000;
+      width: 220px;
+      height: 124px;
       position: relative;
+      background: #000;
     }
 
     .mini-pip-frame iframe {
-      width: 100%;
-      height: 100%;
+      width: 100% !important;
+      height: 100% !important;
       border: none;
+      display: block;
     }
 
-    .mini-pip-bar {
-      width: 240px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .mini-pip-title {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 190px;
-    }
-
-    .mini-pip-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
+    /* Hover close icon */
+    .mini-pip-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2px;
-      border-radius: 4px;
-      transition: color 0.2s ease;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease, background 0.2s ease;
+      z-index: 10;
     }
 
-    .mini-pip-btn:hover {
-      color: var(--text);
+    .mini-pip-container:hover .mini-pip-close {
+      opacity: 1;
+    }
+
+    .mini-pip-close:hover {
+      background: var(--danger);
+      border-color: var(--danger);
     }
 
     /* Bottom: Controls */
@@ -376,7 +370,7 @@
       color: var(--text);
     }
 
-    /* Custom Scrollbar Container */
+    /* Scrollbar Container */
     .modal-content {
       padding: 24px 16px 40px 0;
       overflow-y: auto;
@@ -716,22 +710,20 @@
     <input type="text" id="sessionDesc" class="session-input session-desc" placeholder="Add a short description..." autocomplete="off" />
   </header>
 
-  <!-- Middle: Centered Timer with Mini Preview Window -->
+  <!-- Middle: Centered Timer with Preview Box -->
   <main class="timer-center">
     <div class="timer-display" id="display">00:00:00</div>
 
+    <!-- Minimalist Preview Player Box -->
     <div class="mini-pip-container" id="miniPipContainer">
+      <button class="mini-pip-close" id="closePipBtn" title="Close Preview Player">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
       <div class="mini-pip-frame">
         <div id="ytPlayerContainer"></div>
-      </div>
-      <div class="mini-pip-bar">
-        <span class="mini-pip-title" id="miniPipTitle">Now Playing</span>
-        <button class="mini-pip-btn" id="closePipBtn" title="Close Preview Player">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
       </div>
     </div>
   </main>
@@ -820,6 +812,7 @@
     let cachedTracks = [];
     let secondsElapsed = 0;
     let timerInterval = null;
+    let ytPlayer = null;
 
     // Elements
     const display = document.getElementById('display');
@@ -836,8 +829,6 @@
 
     // Mini Pip Box Elements
     const miniPipContainer = document.getElementById('miniPipContainer');
-    const miniPipTitle = document.getElementById('miniPipTitle');
-    const ytPlayerContainer = document.getElementById('ytPlayerContainer');
     const closePipBtn = document.getElementById('closePipBtn');
 
     // Modals
@@ -860,7 +851,6 @@
       });
     }
 
-    // Modal navigation
     openHistory.addEventListener('click', () => {
       renderHistory();
       historyModal.classList.add('open');
@@ -880,38 +870,70 @@
       musicModal.classList.remove('open');
     });
 
-    // Extract YouTube ID from link
     function extractYouTubeID(url) {
       if (!url) return null;
       const clean = url.trim();
       if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
       const match = clean.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
+      return match ? match[1] : null;
     }
 
-    // Play video in mini preview player
-    function playTrack(videoId, title) {
+    // Play Track using the official YouTube API
+    window.playTrack = function(videoId) {
       if (!videoId) return;
-      miniPipTitle.textContent = title || 'Now Playing';
-      ytPlayerContainer.innerHTML = `
-        <iframe 
-          src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" 
-          title="${title}" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-          allowfullscreen>
-        </iframe>
-      `;
+
       miniPipContainer.classList.add('active');
       musicModal.classList.remove('open');
-    }
+
+      if (window.YT && window.YT.Player) {
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+          ytPlayer.loadVideoById(videoId);
+          ytPlayer.unMute();
+          ytPlayer.playVideo();
+        } else {
+          document.getElementById('ytPlayerContainer').innerHTML = '<div id="yt-frame"></div>';
+          ytPlayer = new YT.Player('yt-frame', {
+            videoId: videoId,
+            playerVars: {
+              autoplay: 1,
+              playsinline: 1,
+              rel: 0,
+              modestbranding: 1,
+              controls: 1,
+              origin: window.location.origin
+            },
+            events: {
+              onReady: (event) => {
+                event.target.unMute();
+                event.target.playVideo();
+              }
+            }
+          });
+        }
+      } else {
+        // Direct Fallback if API hasn't resolved
+        const fallback = document.getElementById('ytPlayerContainer');
+        fallback.innerHTML = `
+          <iframe 
+            src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        `;
+      }
+    };
 
     closePipBtn.addEventListener('click', () => {
       miniPipContainer.classList.remove('active');
-      ytPlayerContainer.innerHTML = '';
+      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo();
+      }
+      document.getElementById('ytPlayerContainer').innerHTML = '';
+      ytPlayer = null;
     });
 
-    // Add Music Form Submission with Error Catching
+    // Add Music Form Submission
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = musicTitleInput.value.trim();
@@ -943,7 +965,7 @@
         musicUrlInput.value = '';
       } catch (err) {
         console.error('Firebase save error:', err);
-        alert('Firebase Permission Denied! Check your database rules in Firebase Console.');
+        alert('Database save failed: ' + err.message);
       }
     });
 
@@ -961,8 +983,8 @@
       if (musicModal.classList.contains('open')) {
         renderMusic();
       }
-    }, (error) => {
-      console.warn('Music listener warning:', error.message);
+    }, (err) => {
+      console.warn('Music listener warning:', err.message);
     });
 
     function renderMusic() {
@@ -981,7 +1003,7 @@
             <span class="music-item-date">Saved on ${track.date || 'Unknown date'}</span>
           </div>
           <div class="music-actions">
-            <button class="music-play-btn" data-video="${track.videoId}" data-title="${encodeURIComponent(track.title)}">
+            <button class="music-play-btn" data-video="${track.videoId}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
               Play
             </button>
@@ -999,8 +1021,7 @@
       musicContainer.querySelectorAll('.music-play-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const vid = btn.dataset.video;
-          const title = decodeURIComponent(btn.dataset.title);
-          playTrack(vid, title);
+          window.playTrack(vid);
         });
       });
 
@@ -1091,8 +1112,8 @@
       if (historyModal.classList.contains('open')) {
         renderHistory();
       }
-    }, (error) => {
-      console.warn('Sessions listener warning:', error.message);
+    }, (err) => {
+      console.warn('Sessions listener warning:', err.message);
     });
 
     function renderHistory() {

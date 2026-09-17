@@ -25,6 +25,18 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    ::selection {
+      background: transparent;
+      color: inherit;
+    }
+
+    input, textarea {
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     body {
@@ -85,6 +97,14 @@
     .nav-icon-btn:hover {
       color: var(--accent);
       background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Bottom Left: Stickers Modal Button */
+    .bottom-left-action {
+      position: absolute;
+      bottom: 28px;
+      left: 32px;
+      z-index: 10;
     }
 
     /* Bottom Right: Live Clock */
@@ -208,7 +228,73 @@
       color: var(--text);
     }
 
-    /* Right Middle Preview Player (Cropping Header & Clutter) */
+    /* Stickers Canvas Overlay */
+    .stickers-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 8;
+    }
+
+    .floating-sticker {
+      position: absolute;
+      opacity: 0.38;
+      filter: grayscale(15%);
+      transition: opacity 0.2s ease, filter 0.2s ease;
+      pointer-events: auto;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .floating-sticker:hover {
+      opacity: 0.9;
+      filter: grayscale(0%);
+    }
+
+    .floating-sticker:active {
+      cursor: grabbing;
+    }
+
+    .floating-sticker img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
+
+    .sticker-delete-tag {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #141618;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1;
+      transition: all 0.2s ease;
+    }
+
+    .floating-sticker:hover .sticker-delete-tag {
+      display: flex;
+    }
+
+    .sticker-delete-tag:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Right Middle Preview Player */
     .mini-pip-container {
       display: none;
       position: fixed;
@@ -319,28 +405,29 @@
       border-color: var(--accent);
     }
 
+    /* Minimalist Close Pill Button */
     .mini-pip-close {
       position: absolute;
       top: 6px;
       right: 6px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(20, 22, 24, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text-muted);
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: all 0.2s ease;
       z-index: 20;
     }
 
     .mini-pip-close:hover {
-      background: var(--danger);
-      border-color: var(--danger);
-      color: #fff;
+      background: rgba(35, 38, 43, 0.95);
+      border-color: var(--accent);
+      color: var(--text);
     }
 
     /* Bottom: Controls */
@@ -514,13 +601,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
+      padding: 12px 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      position: relative;
+      border-radius: 6px;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
 
     .history-item:last-child {
       border-bottom: none;
+    }
+
+    .history-item.active-playing {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .history-item-meta {
@@ -743,7 +836,7 @@
       gap: 24px;
     }
 
-    /* Central Floating Modal for Adding YouTube Video */
+    /* Central Floating Modal for Adding YouTube Video / Stickers */
     .floating-dialog-backdrop {
       display: none;
       position: fixed;
@@ -785,7 +878,7 @@
       letter-spacing: 0.02em;
     }
 
-    .music-url-input {
+    .dialog-input {
       width: 100%;
       background: #0d0f11;
       border: 1px solid var(--border);
@@ -798,7 +891,7 @@
       transition: border-color 0.2s ease;
     }
 
-    .music-url-input:focus {
+    .dialog-input:focus {
       border-color: var(--accent);
     }
 
@@ -817,6 +910,47 @@
 
     .dialog-submit-btn:hover {
       opacity: 0.9;
+    }
+
+    /* Sticker Settings Item */
+    .sticker-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .sticker-grid-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .sticker-grid-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    .sticker-scale-control {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .sticker-scale-control input {
+      flex: 1;
+      accent-color: var(--accent);
     }
   </style>
 </head>
@@ -845,6 +979,21 @@
     </button>
   </div>
 
+  <!-- Bottom-left: Stickers Config Action -->
+  <div class="bottom-left-action">
+    <button class="nav-icon-btn" id="openStickersModal" aria-label="Manage Stickers" title="Timer Stickers">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Stickers Canvas Overlay on Timer -->
+  <div class="stickers-canvas" id="stickersCanvas"></div>
+
   <!-- Left Middle: Reset Button -->
   <button class="edge-reset-btn" id="resetBtn" aria-label="Reset Timer (R)" title="Reset Timer [R]">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -870,19 +1019,15 @@
   <!-- Outer Right Edge Mini Preview Player -->
   <aside class="mini-pip-container" id="miniPipContainer">
     <button class="mini-pip-close" id="closePipBtn" title="Close Preview Player">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
 
-    <!-- Top Mask to block persistent YouTube Title Overlay -->
     <div class="pip-top-mask"></div>
-
-    <!-- Clutter Mask for buffering/paused states -->
     <div class="pip-obscure-mask" id="pipMask"></div>
 
-    <!-- Hover Play/Pause Toggle Disc -->
     <div class="mini-pip-overlay" id="pipOverlay">
       <div class="pip-center-toggle" id="pipPlayPauseBtn" title="Play / Pause [P]">
         <svg id="pipPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -1010,6 +1155,27 @@
     </div>
   </div>
 
+  <!-- Fullscreen Stickers Manager Screen -->
+  <div class="modal-fullscreen" id="stickersModal">
+    <div class="modal-shell">
+      <div class="modal-header">
+        <h3>Timer Stickers</h3>
+        <button class="close-btn" id="closeStickersModal" aria-label="Close Stickers">&times;</button>
+      </div>
+      <div class="modal-content">
+        <form id="addStickerForm" style="display: flex; gap: 12px;">
+          <input type="url" id="stickerUrlInput" class="dialog-input" placeholder="Paste transparent PNG image URL..." autocomplete="off" required />
+          <button type="submit" class="dialog-submit-btn" style="width: 140px;">Add Sticker</button>
+        </form>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Active Stickers</h4>
+          <div class="sticker-list-grid" id="stickersGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Central Floating Modal for Adding YouTube Video -->
   <div class="floating-dialog-backdrop" id="addTrackDialog">
     <div class="floating-dialog">
@@ -1018,7 +1184,7 @@
         <button class="close-btn" id="closeAddDialogBtn">&times;</button>
       </div>
       <form id="musicAddForm">
-        <input type="text" id="musicUrlInput" class="music-url-input" placeholder="YouTube URL or 11-char ID..." autocomplete="off" required />
+        <input type="text" id="musicUrlInput" class="dialog-input" placeholder="YouTube URL or 11-char ID..." autocomplete="off" required />
         <button type="submit" class="dialog-submit-btn" id="musicSubmitBtn" style="margin-top: 14px;">Add to Library</button>
       </form>
     </div>
@@ -1043,9 +1209,11 @@
     const db = getDatabase(app);
     const sessionsRef = ref(db, 'study_sessions');
     const musicRef = ref(db, 'music');
+    const stickersRef = ref(db, 'stickers');
 
     let cachedSessions = [];
     let cachedTracks = [];
+    let cachedStickers = [];
     let secondsElapsed = 0;
     let timerInterval = null;
 
@@ -1059,9 +1227,6 @@
     let totalDuration = 0;
     let syncInterval = null;
     let isSeeking = false;
-
-    // Hardware Audio Output Tracking
-    let knownAudioDeviceCount = 0;
 
     // Elements
     const display = document.getElementById('display');
@@ -1120,6 +1285,25 @@
     const musicUrlInput = document.getElementById('musicUrlInput');
     const musicSubmitBtn = document.getElementById('musicSubmitBtn');
 
+    // Stickers Elements
+    const stickersCanvas = document.getElementById('stickersCanvas');
+    const stickersModal = document.getElementById('stickersModal');
+    const openStickersModal = document.getElementById('openStickersModal');
+    const closeStickersModal = document.getElementById('closeStickersModal');
+    const addStickerForm = document.getElementById('addStickerForm');
+    const stickerUrlInput = document.getElementById('stickerUrlInput');
+    const stickersGrid = document.getElementById('stickersGrid');
+
+    // Prevent Ctrl+A highlighting entire web page
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag !== 'input' && tag !== 'textarea') {
+          e.preventDefault();
+        }
+      }
+    });
+
     function closeAllDropdowns() {
       document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
         menu.classList.remove('active');
@@ -1145,7 +1329,15 @@
       musicModal.classList.remove('open');
     });
 
-    // Central Floating Dialog Triggers
+    openStickersModal.addEventListener('click', () => {
+      renderStickersGrid();
+      stickersModal.classList.add('open');
+    });
+
+    closeStickersModal.addEventListener('click', () => {
+      stickersModal.classList.remove('open');
+    });
+
     openAddDialogBtn.addEventListener('click', () => {
       addTrackDialog.classList.add('open');
       musicUrlInput.focus();
@@ -1197,7 +1389,7 @@
       panelTrackTitle.textContent = currentTrackTitle;
       panelStatus.textContent = 'BUFFERING';
 
-      // Restore saved progress for this track
+      // Restore saved progress
       const savedTime = parseFloat(localStorage.getItem(`yt_progress_${videoId}`)) || 0;
       currentTime = savedTime;
       panelCurrTime.textContent = formatSec(currentTime);
@@ -1220,7 +1412,6 @@
 
       const iframe = document.getElementById('yt-direct-iframe');
       iframe.addEventListener('load', () => {
-        // Send initial handshakes to YouTube iframe
         iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
         sendYTCommand('unloadModule', ['captions']);
         sendYTCommand('unloadModule', ['cc']);
@@ -1229,6 +1420,7 @@
 
       updatePlayerUIState(true);
       startTimerSync();
+      renderMusic();
     }
 
     function togglePlayback() {
@@ -1249,7 +1441,9 @@
       pipMask.classList.remove('blocked');
       clearInterval(syncInterval);
       updatePlayerUIState(false);
+      currentVideoId = null;
       panelStatus.textContent = 'IDLE';
+      renderMusic();
     }
 
     function updatePlayerUIState(playing) {
@@ -1269,9 +1463,10 @@
 
       panelPlayIcon.style.display = playing ? 'none' : 'block';
       panelPauseIcon.style.display = playing ? 'block' : 'none';
+      renderMusic();
     }
 
-    // Bidirectional postMessage Listener (Accurate Seek, Duration, & Time Sync)
+    // Bidirectional postMessage Listener
     window.addEventListener('message', (event) => {
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
@@ -1323,7 +1518,6 @@
       syncInterval = setInterval(() => {
         const iframe = document.getElementById('yt-direct-iframe');
         if (iframe && iframe.contentWindow) {
-          // Both listening handshake and direct delivery triggers
           iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
           iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'getCurrentTime' }), '*');
           iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'getDuration' }), '*');
@@ -1336,28 +1530,6 @@
       const m = Math.floor(s / 60);
       const remain = s % 60;
       return `${String(m).padStart(2, '0')}:${String(remain).padStart(2, '0')}`;
-    }
-
-    // Hardware Jack Disconnection Watcher
-    if (navigator.mediaDevices && navigator.mediaDevices.ondevicechange !== undefined) {
-      navigator.mediaDevices.enumerateDevices().then(devices => {
-        const audioDevices = devices.filter(d => d.kind === 'audiooutput' || d.kind === 'audioinput');
-        knownAudioDeviceCount = audioDevices.length;
-      }).catch(() => {});
-
-      navigator.mediaDevices.addEventListener('devicechange', async () => {
-        try {
-          const updatedDevices = await navigator.mediaDevices.enumerateDevices();
-          const currentAudioDevices = updatedDevices.filter(d => d.kind === 'audiooutput' || d.kind === 'audioinput');
-
-          if (currentAudioDevices.length <= knownAudioDeviceCount && isPlaying) {
-            closeAndStopPlayer();
-          }
-          knownAudioDeviceCount = currentAudioDevices.length;
-        } catch (e) {
-          if (isPlaying) closeAndStopPlayer();
-        }
-      });
     }
 
     pipPlayPauseBtn.addEventListener('click', (e) => {
@@ -1405,7 +1577,7 @@
       sendYTCommand('seekTo', [target, true]);
     });
 
-    // Seek bar drag & click handling
+    // Seek bar drag handling
     panelSeekBar.addEventListener('mousedown', () => { isSeeking = true; });
     panelSeekBar.addEventListener('touchstart', () => { isSeeking = true; });
 
@@ -1425,7 +1597,7 @@
       isSeeking = false;
     });
 
-    // Form submission inside floating dialog
+    // Form submission: Adds track to database without forcing redirect to timer
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawInput = musicUrlInput.value.trim();
@@ -1515,18 +1687,26 @@
         groupEl.innerHTML = `<h4>${dateLabel}</h4>`;
 
         grouped[date].forEach(track => {
+          const isCurrentlyPlaying = currentVideoId === track.videoId;
           const row = document.createElement('div');
-          row.className = 'history-item';
+          row.className = `history-item ${isCurrentlyPlaying ? 'active-playing' : ''}`;
           row.innerHTML = `
             <div class="history-item-meta">
               <span class="history-item-title">
-                <span style="font-family: 'Share Tech Mono', monospace; color: var(--text-muted);">S${track.itemNum}:</span>
-                ${track.title}
+                <span style="font-family: 'Share Tech Mono', monospace; color: ${isCurrentlyPlaying ? 'var(--text)' : 'var(--text-muted)'};">
+                  ${isCurrentlyPlaying ? (isPlaying ? '▶' : '⏸') : `S${track.itemNum}:`}
+                </span>
+                <span style="color: ${isCurrentlyPlaying ? 'var(--text)' : 'inherit'}; font-weight: ${isCurrentlyPlaying ? '500' : '400'};">
+                  ${track.title}
+                </span>
               </span>
             </div>
             <div class="history-item-right">
-              <button class="nav-icon-btn play-track-btn" data-video="${track.videoId}" data-title="S${track.itemNum}: ${encodeURIComponent(track.title)}" title="Play Track">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <button class="nav-icon-btn play-track-btn" data-video="${track.videoId}" data-title="S${track.itemNum}: ${encodeURIComponent(track.title)}" title="${isCurrentlyPlaying && isPlaying ? 'Pause Track' : 'Play Track'}">
+                ${isCurrentlyPlaying && isPlaying 
+                  ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`
+                  : `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`
+                }
               </button>
               <button class="nav-icon-btn delete-track-btn" data-key="${track.firebaseKey}" title="Delete track">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1546,7 +1726,11 @@
         btn.addEventListener('click', () => {
           const vid = btn.dataset.video;
           const title = decodeURIComponent(btn.dataset.title);
-          playTrack(vid, title);
+          if (currentVideoId === vid) {
+            togglePlayback();
+          } else {
+            playTrack(vid, title);
+          }
         });
       });
 
@@ -1562,6 +1746,129 @@
             }
           }
         });
+      });
+    }
+
+    // Stickers Firebase Synchronization & Drag Mechanics
+    addStickerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = stickerUrlInput.value.trim();
+      if (!url) return;
+
+      const stickerData = {
+        url: url,
+        x: 60,
+        y: 120,
+        size: 140,
+        createdAt: Date.now()
+      };
+
+      try {
+        const newRef = push(stickersRef);
+        await set(newRef, stickerData);
+        stickerUrlInput.value = '';
+      } catch (err) {
+        alert('Failed adding sticker: ' + err.message);
+      }
+    });
+
+    onValue(stickersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        cachedStickers = Object.keys(data).map(k => ({ firebaseKey: k, ...data[k] }));
+      } else {
+        cachedStickers = [];
+      }
+      renderStickersOnTimer();
+      if (stickersModal.classList.contains('open')) {
+        renderStickersGrid();
+      }
+    });
+
+    function renderStickersOnTimer() {
+      stickersCanvas.innerHTML = '';
+      cachedStickers.forEach(stk => {
+        const el = document.createElement('div');
+        el.className = 'floating-sticker';
+        el.style.left = `${stk.x || 80}px`;
+        el.style.top = `${stk.y || 120}px`;
+        el.style.width = `${stk.size || 140}px`;
+        el.style.height = `${stk.size || 140}px`;
+
+        el.innerHTML = `
+          <img src="${stk.url}" alt="sticker" draggable="false" />
+          <button class="sticker-delete-tag" title="Remove">&times;</button>
+        `;
+
+        el.querySelector('.sticker-delete-tag').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await remove(ref(db, `stickers/${stk.firebaseKey}`));
+        });
+
+        // Dragging mechanism
+        let startX, startY, origX, origY;
+        el.addEventListener('mousedown', (e) => {
+          if (e.target.classList.contains('sticker-delete-tag')) return;
+          startX = e.clientX;
+          startY = e.clientY;
+          origX = el.offsetLeft;
+          origY = el.offsetTop;
+
+          function onMouseMove(ev) {
+            const nextX = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, origX + (ev.clientX - startX)));
+            const nextY = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, origY + (ev.clientY - startY)));
+            el.style.left = `${nextX}px`;
+            el.style.top = `${nextY}px`;
+          }
+
+          function onMouseUp(ev) {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            const finalX = parseInt(el.style.left);
+            const finalY = parseInt(el.style.top);
+            set(ref(db, `stickers/${stk.firebaseKey}/x`), finalX);
+            set(ref(db, `stickers/${stk.firebaseKey}/y`), finalY);
+          }
+
+          window.addEventListener('mousemove', onMouseMove);
+          window.addEventListener('mouseup', onMouseUp);
+        });
+
+        stickersCanvas.appendChild(el);
+      });
+    }
+
+    function renderStickersGrid() {
+      if (!cachedStickers.length) {
+        stickersGrid.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted); grid-column: 1 / -1;">No active stickers on screen. Add transparent PNG URL above.</p>';
+        return;
+      }
+
+      stickersGrid.innerHTML = '';
+      cachedStickers.forEach(stk => {
+        const card = document.createElement('div');
+        card.className = 'sticker-grid-card';
+        card.innerHTML = `
+          <img src="${stk.url}" alt="sticker" />
+          <div class="sticker-scale-control">
+            <span>Size</span>
+            <input type="range" min="60" max="320" value="${stk.size || 140}" data-key="${stk.firebaseKey}" />
+          </div>
+          <button class="nav-icon-btn del-stk-btn" data-key="${stk.firebaseKey}" title="Delete" style="align-self: flex-end; padding: 2px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        `;
+
+        const slider = card.querySelector('input');
+        slider.addEventListener('change', () => {
+          set(ref(db, `stickers/${stk.firebaseKey}/size`), parseInt(slider.value));
+        });
+
+        card.querySelector('.del-stk-btn').addEventListener('click', async () => {
+          await remove(ref(db, `stickers/${stk.firebaseKey}`));
+        });
+
+        stickersGrid.appendChild(card);
       });
     }
 
@@ -1796,7 +2103,7 @@
     stopBtn.addEventListener('click', finishSession);
     resetBtn.addEventListener('click', resetTimer);
 
-    // Global Key Handlers
+    // Global Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
       if (activeTag === 'input' || activeTag === 'textarea') {
@@ -1829,6 +2136,7 @@
         } else {
           historyModal.classList.remove('open');
           musicModal.classList.remove('open');
+          stickersModal.classList.remove('open');
           closeAllDropdowns();
         }
       }

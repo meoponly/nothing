@@ -911,7 +911,7 @@
       ytPlayerContainer.innerHTML = '';
     });
 
-    // Add Music Form Submission
+    // Add Music Form Submission with Error Catching
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = musicTitleInput.value.trim();
@@ -936,11 +936,15 @@
         createdAt: Date.now()
       };
 
-      const newTrackRef = push(musicRef);
-      await set(newTrackRef, trackData);
-
-      musicTitleInput.value = '';
-      musicUrlInput.value = '';
+      try {
+        const newTrackRef = push(musicRef);
+        await set(newTrackRef, trackData);
+        musicTitleInput.value = '';
+        musicUrlInput.value = '';
+      } catch (err) {
+        console.error('Firebase save error:', err);
+        alert('Firebase Permission Denied! Check your database rules in Firebase Console.');
+      }
     });
 
     // Music Firebase Listener
@@ -957,6 +961,8 @@
       if (musicModal.classList.contains('open')) {
         renderMusic();
       }
+    }, (error) => {
+      console.warn('Music listener warning:', error.message);
     });
 
     function renderMusic() {
@@ -1002,7 +1008,12 @@
         btn.addEventListener('click', async () => {
           const key = btn.dataset.key;
           if (confirm('Delete this track?')) {
-            await remove(ref(db, `music/${key}`));
+            try {
+              await remove(ref(db, `music/${key}`));
+            } catch (err) {
+              console.error(err);
+              alert('Permission denied deleting track.');
+            }
           }
         });
       });
@@ -1080,6 +1091,8 @@
       if (historyModal.classList.contains('open')) {
         renderHistory();
       }
+    }, (error) => {
+      console.warn('Sessions listener warning:', error.message);
     });
 
     function renderHistory() {
@@ -1147,7 +1160,12 @@
           closeAllDropdowns();
           const key = btn.dataset.key;
           if (confirm('Delete this study session record?')) {
-            await remove(ref(db, `study_sessions/${key}`));
+            try {
+              await remove(ref(db, `study_sessions/${key}`));
+            } catch (err) {
+              console.error(err);
+              alert('Permission denied deleting session.');
+            }
           }
         });
       });
@@ -1193,8 +1211,13 @@
           createdAt: Date.now()
         };
 
-        const newSessionRef = push(sessionsRef);
-        await set(newSessionRef, sessionData);
+        try {
+          const newSessionRef = push(sessionsRef);
+          await set(newSessionRef, sessionData);
+        } catch (err) {
+          console.error('Session save error:', err);
+          alert('Database Permission Denied saving session.');
+        }
 
         secondsElapsed = 0;
         display.textContent = '00:00:00';

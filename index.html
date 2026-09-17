@@ -208,7 +208,7 @@
       color: var(--text);
     }
 
-    /* Right Middle Fixed Preview Player (Pure Minimalist, Auto-Crop Overlays) */
+    /* Right Middle Mini Preview Player */
     .mini-pip-container {
       display: none;
       position: fixed;
@@ -245,7 +245,7 @@
       overflow: hidden;
     }
 
-    /* Zoomed and cropped iframe to completely hide YouTube title, avatar & logo watermark */
+    /* Scaled and cropped iframe to shift out top & bottom YouTube elements */
     .mini-pip-frame iframe {
       position: absolute;
       top: -38%;
@@ -257,11 +257,26 @@
       pointer-events: none;
     }
 
-    /* Hover Overlay (Single Centered Play/Pause Button) */
+    /* Anti-Clutter Mask: Covers YouTube native pause/idle gray play buttons and titles */
+    .pip-obscure-mask {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 5;
+    }
+
+    .pip-obscure-mask.blocked {
+      opacity: 0.88;
+    }
+
+    /* Hover Overlay (Single Minimalist Play/Pause Disc) */
     .mini-pip-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.38);
+      background: rgba(0, 0, 0, 0.35);
       opacity: 0;
       transition: opacity 0.2s ease;
       display: flex;
@@ -271,7 +286,8 @@
       z-index: 10;
     }
 
-    .mini-pip-container:hover .mini-pip-overlay {
+    .mini-pip-container:hover .mini-pip-overlay,
+    .mini-pip-container.paused .mini-pip-overlay {
       opacity: 1;
     }
 
@@ -783,7 +799,7 @@
     <div class="timer-display" id="display">00:00:00</div>
   </main>
 
-  <!-- Outer Right Edge Mini Preview Player (Pure video & hover button) -->
+  <!-- Outer Right Edge Mini Preview Player -->
   <aside class="mini-pip-container" id="miniPipContainer">
     <button class="mini-pip-close" id="closePipBtn" title="Close Preview Player">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -791,6 +807,11 @@
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
+
+    <!-- Native Clutter Mask Layer -->
+    <div class="pip-obscure-mask" id="pipMask"></div>
+
+    <!-- Custom Single Play/Pause Trigger Overlay -->
     <div class="mini-pip-overlay" id="pipOverlay">
       <div class="pip-center-toggle" id="pipPlayPauseBtn" title="Play / Pause">
         <svg id="pipPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -802,6 +823,7 @@
         </svg>
       </div>
     </div>
+
     <div class="mini-pip-frame">
       <div id="ytPlayerContainer" style="width: 100%; height: 100%;"></div>
     </div>
@@ -965,6 +987,7 @@
 
     // Mini Pip Player Elements
     const miniPipContainer = document.getElementById('miniPipContainer');
+    const pipMask = document.getElementById('pipMask');
     const pipOverlay = document.getElementById('pipOverlay');
     const pipPlayPauseBtn = document.getElementById('pipPlayPauseBtn');
     const pipPlayIcon = document.getElementById('pipPlayIcon');
@@ -1027,7 +1050,6 @@
       musicModal.classList.remove('open');
     });
 
-    // Flexible YouTube Video ID Extractor: Accepts standard links, short links, or direct IDs
     function extractYouTubeID(input) {
       if (!input) return null;
       const clean = input.trim();
@@ -1067,7 +1089,9 @@
       miniPipContainer.classList.add('active');
       musicModal.classList.remove('open');
 
-      // Embed parameters disable controls, annotations, captions, and brand links
+      // Turn on obscure mask while frame loads
+      pipMask.classList.add('blocked');
+
       const embedSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&cc_load_policy=0&iv_load_policy=3`;
 
       ytPlayerContainer.innerHTML = `
@@ -1079,7 +1103,6 @@
         </iframe>
       `;
 
-      // Strictly clear captions
       const iframe = document.getElementById('yt-direct-iframe');
       iframe.addEventListener('load', () => {
         sendYTCommand('unloadModule', ['captions']);
@@ -1104,6 +1127,14 @@
     function updatePlayerUIState(playing) {
       isPlaying = playing;
       panelStatus.textContent = playing ? 'PLAYING' : 'PAUSED';
+
+      if (playing) {
+        miniPipContainer.classList.remove('paused');
+        pipMask.classList.remove('blocked');
+      } else {
+        miniPipContainer.classList.add('paused');
+        pipMask.classList.add('blocked');
+      }
 
       pipPlayIcon.style.display = playing ? 'none' : 'block';
       pipPauseIcon.style.display = playing ? 'block' : 'none';
@@ -1177,6 +1208,7 @@
       miniPipContainer.classList.remove('active');
       sendYTCommand('stopVideo');
       ytPlayerContainer.innerHTML = '';
+      pipMask.classList.remove('blocked');
       clearInterval(syncInterval);
       updatePlayerUIState(false);
       panelStatus.textContent = 'IDLE';

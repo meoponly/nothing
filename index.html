@@ -228,7 +228,7 @@
       color: var(--text);
     }
 
-    /* Stickers Canvas Overlay */
+    /* Clean Stickers Canvas Overlay (Zero buttons/tags on timer) */
     .stickers-canvas {
       position: fixed;
       inset: 0;
@@ -270,49 +270,6 @@
       object-fit: contain;
       pointer-events: none;
       display: block;
-    }
-
-    /* Sticker Control Tags on Hover */
-    .sticker-actions-overlay {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      display: none;
-      align-items: center;
-      gap: 4px;
-      z-index: 15;
-    }
-
-    .floating-sticker:hover .sticker-actions-overlay {
-      display: flex;
-    }
-
-    .sticker-tag-btn {
-      background: #141618;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 11px;
-      line-height: 1;
-      transition: all 0.2s ease;
-    }
-
-    .sticker-tag-btn:hover {
-      color: var(--text);
-      border-color: var(--accent);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .sticker-tag-btn.active-lock {
-      color: #10b981;
-      border-color: #10b981;
-      background: rgba(16, 185, 129, 0.12);
     }
 
     /* Right Middle Preview Player */
@@ -962,7 +919,7 @@
 
     .sticker-list-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 12px;
       max-height: 240px;
       overflow-y: auto;
@@ -972,7 +929,7 @@
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1037,7 +994,7 @@
     </button>
   </div>
 
-  <!-- Stickers Canvas Overlay on Timer -->
+  <!-- Clean Stickers Canvas Overlay on Timer (Zero buttons/tags on hover) -->
   <div class="stickers-canvas" id="stickersCanvas"></div>
 
   <!-- Left Middle: Reset Button -->
@@ -1655,6 +1612,7 @@
       isSeeking = false;
     });
 
+    // Add Music: Stays on modal without redirecting to timer
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawInput = musicUrlInput.value.trim();
@@ -1806,7 +1764,7 @@
       });
     }
 
-    // Save Sticker to Firebase with lock flag
+    // Save Sticker to Firebase
     async function saveSticker(url) {
       const stickerData = {
         url: url,
@@ -1866,6 +1824,7 @@
       }
     });
 
+    // Render Stickers on Main Timer: Completely clean with no visible control tags
     function renderStickersOnTimer() {
       stickersCanvas.innerHTML = '';
       cachedStickers.forEach(stk => {
@@ -1877,35 +1836,12 @@
         el.style.width = `${stk.size || 140}px`;
         el.style.height = `${stk.size || 140}px`;
 
-        el.innerHTML = `
-          <img src="${stk.url}" alt="sticker" draggable="false" />
-          <div class="sticker-actions-overlay">
-            <button class="sticker-tag-btn lock-tag-btn ${isLocked ? 'active-lock' : ''}" title="${isLocked ? 'Unlock Position' : 'Lock/Fix Position'}">
-              ✓
-            </button>
-            ${!isLocked ? `<button class="sticker-tag-btn delete-tag-btn" title="Remove">&times;</button>` : ''}
-          </div>
-        `;
+        el.innerHTML = `<img src="${stk.url}" alt="sticker" draggable="false" />`;
 
-        // Toggle Fix/Lock
-        el.querySelector('.lock-tag-btn').addEventListener('click', async (e) => {
-          e.stopPropagation();
-          await set(ref(db, `stickers/${stk.firebaseKey}/locked`), !isLocked);
-        });
-
-        // Delete (if unlocked)
-        const delBtn = el.querySelector('.delete-tag-btn');
-        if (delBtn) {
-          delBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            await remove(ref(db, `stickers/${stk.firebaseKey}`));
-          });
-        }
-
-        // Dragging mechanic (Disabled if locked)
+        // Dragging mechanic (Active only if unlocked)
         let startX, startY, origX, origY;
         el.addEventListener('mousedown', (e) => {
-          if (isLocked || e.target.closest('.sticker-actions-overlay')) return;
+          if (isLocked) return;
           startX = e.clientX;
           startY = e.clientY;
           origX = el.offsetLeft;
@@ -1935,6 +1871,7 @@
       });
     }
 
+    // Render Stickers Grid in Photos & Stickers Menu (Fix/Lock, Sizing & Delete Controls Here Only)
     function renderStickersGrid() {
       if (!cachedStickers.length) {
         stickersGrid.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted); grid-column: 1 / -1;">No active stickers on screen. Upload a PNG from your device or paste a URL above.</p>';
@@ -1952,11 +1889,11 @@
             <span>Size</span>
             <input type="range" min="60" max="320" value="${stk.size || 140}" ${isLocked ? 'disabled' : ''} />
           </div>
-          <div style="display: flex; gap: 8px; align-self: flex-end;">
-            <button class="nav-icon-btn lock-stk-btn" title="${isLocked ? 'Unlock' : 'Fix / Lock'}" style="padding: 2px; color: ${isLocked ? '#10b981' : 'var(--text-muted)'};">
+          <div style="display: flex; gap: 8px; align-self: flex-end; align-items: center; margin-top: 2px;">
+            <button class="nav-icon-btn lock-stk-btn" title="${isLocked ? 'Unlock Position' : 'Lock / Fix Position'}" style="padding: 3px; font-size: 12px; font-weight: bold; color: ${isLocked ? '#10b981' : 'var(--text-muted)'};">
               ✓
             </button>
-            <button class="nav-icon-btn del-stk-btn" title="Delete" style="padding: 2px;">
+            <button class="nav-icon-btn del-stk-btn" title="Delete Sticker" style="padding: 3px;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>

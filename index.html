@@ -208,7 +208,7 @@
       color: var(--text);
     }
 
-    /* Right Middle Preview Player */
+    /* Right Middle Preview Player (Minimalist & Cropped Overlays) */
     .mini-pip-container {
       display: none;
       position: fixed;
@@ -245,6 +245,7 @@
       overflow: hidden;
     }
 
+    /* Scaled & cropped iframe to shift out top & bottom YouTube elements */
     .mini-pip-frame iframe {
       position: absolute;
       top: -38%;
@@ -256,7 +257,7 @@
       pointer-events: none;
     }
 
-    /* Native Clutter Mask: Blocks YouTube UI on pause / buffer */
+    /* Anti-Clutter Mask: Hides YouTube native pause/buffer badges */
     .pip-obscure-mask {
       position: absolute;
       inset: 0;
@@ -271,7 +272,7 @@
       opacity: 0.9;
     }
 
-    /* Hover Overlay */
+    /* Hover Overlay (Center Play/Pause Toggle Disc) */
     .mini-pip-overlay {
       position: absolute;
       inset: 0;
@@ -812,7 +813,7 @@
 
     <!-- Custom Center Play/Pause Disc -->
     <div class="mini-pip-overlay" id="pipOverlay">
-      <div class="pip-center-toggle" id="pipPlayPauseBtn" title="Play / Pause">
+      <div class="pip-center-toggle" id="pipPlayPauseBtn" title="Play / Pause [P]">
         <svg id="pipPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
@@ -885,7 +886,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3"></line></svg>
               </button>
 
-              <button class="panel-btn panel-play-btn" id="panelPlayPauseBtn" title="Play / Pause">
+              <button class="panel-btn panel-play-btn" id="panelPlayPauseBtn" title="Play / Pause [P]">
                 <svg id="panelPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 <svg id="panelPauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
               </button>
@@ -1116,6 +1117,7 @@
     }
 
     function togglePlayback() {
+      if (!currentVideoId) return;
       if (isPlaying) {
         sendYTCommand('pauseVideo');
         updatePlayerUIState(false);
@@ -1171,13 +1173,13 @@
           if (totalDuration > 0) {
             panelSeekBar.value = (currentTime / totalDuration) * 100;
           }
-          if (data.info.playerState === 1) { // Playing
+          if (data.info.playerState === 1) {
             updatePlayerUIState(true);
             sendYTCommand('unloadModule', ['captions']);
             sendYTCommand('setOption', ['captions', 'track', {}]);
-          } else if (data.info.playerState === 2) { // Paused
+          } else if (data.info.playerState === 2) {
             updatePlayerUIState(false);
-          } else if (data.info.playerState === 0) { // Ended
+          } else if (data.info.playerState === 0) {
             if (isLooping) {
               sendYTCommand('seekTo', [0, true]);
               sendYTCommand('playVideo');
@@ -1663,6 +1665,9 @@
       if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
         e.preventDefault();
         toggleTimer();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        togglePlayback();
       } else if (e.key === 'Enter') {
         e.preventDefault();
         finishSession();

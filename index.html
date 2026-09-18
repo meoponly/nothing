@@ -99,14 +99,6 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
-    /* Bottom Left: Stickers Modal Button */
-    .bottom-left-action {
-      position: absolute;
-      bottom: 28px;
-      left: 32px;
-      z-index: 10;
-    }
-
     /* Bottom Right: Live Clock */
     .live-clock {
       position: absolute;
@@ -889,74 +881,6 @@
     .dialog-submit-btn:hover {
       opacity: 0.9;
     }
-
-    /* Sticker Controls */
-    .sticker-upload-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .upload-file-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s ease;
-    }
-
-    .upload-file-btn:hover {
-      border-color: var(--accent);
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .sticker-list-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      max-height: 240px;
-      overflow-y: auto;
-    }
-
-    .sticker-grid-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-    }
-
-    .sticker-grid-card img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-    }
-
-    .sticker-scale-control {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .sticker-scale-control input {
-      flex: 1;
-      accent-color: var(--accent);
-    }
   </style>
 </head>
 <body>
@@ -980,17 +904,6 @@
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="10" r="10"></circle>
         <polyline points="12 6 12 12 16 14"></polyline>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Bottom-left: Photos Icon for Timer Stickers -->
-  <div class="bottom-left-action">
-    <button class="nav-icon-btn" id="openStickersModal" aria-label="Manage Stickers" title="Photos & Stickers">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-        <polyline points="21 15 16 10 5 21"></polyline>
       </svg>
     </button>
   </div>
@@ -1159,39 +1072,6 @@
     </div>
   </div>
 
-  <!-- Fullscreen Photos / Stickers Screen -->
-  <div class="modal-fullscreen" id="stickersModal">
-    <div class="modal-shell">
-      <div class="modal-header">
-        <h3>Photos & Stickers</h3>
-        <button class="close-btn" id="closeStickersModal" aria-label="Close Stickers">&times;</button>
-      </div>
-      <div class="modal-content">
-        <div class="sticker-upload-wrap">
-          <label class="upload-file-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            Choose PNG image from device
-            <input type="file" id="localStickerFile" accept="image/*" style="display: none;" />
-          </label>
-
-          <form id="addStickerForm" style="display: flex; gap: 12px;">
-            <input type="url" id="stickerUrlInput" class="dialog-input" placeholder="Or paste transparent PNG image URL..." autocomplete="off" />
-            <button type="submit" class="dialog-submit-btn" style="width: 140px;">Add URL</button>
-          </form>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Active Stickers</h4>
-          <div class="sticker-list-grid" id="stickersGrid"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Central Floating Modal for Adding YouTube Video -->
   <div class="floating-dialog-backdrop" id="addTrackDialog">
     <div class="floating-dialog">
@@ -1302,17 +1182,10 @@
     const musicUrlInput = document.getElementById('musicUrlInput');
     const musicSubmitBtn = document.getElementById('musicSubmitBtn');
 
-    // Stickers Elements
+    // Stickers Canvas Element
     const stickersCanvas = document.getElementById('stickersCanvas');
-    const stickersModal = document.getElementById('stickersModal');
-    const openStickersModal = document.getElementById('openStickersModal');
-    const closeStickersModal = document.getElementById('closeStickersModal');
-    const addStickerForm = document.getElementById('addStickerForm');
-    const stickerUrlInput = document.getElementById('stickerUrlInput');
-    const localStickerFile = document.getElementById('localStickerFile');
-    const stickersGrid = document.getElementById('stickersGrid');
 
-    // --- Offline Cache & Auto-Sync Engine ---
+    // --- Offline Cache Engine ---
     function getOfflineList(key) {
       try {
         return JSON.parse(localStorage.getItem(key)) || [];
@@ -1331,7 +1204,6 @@
       setOfflineList(key, list);
     }
 
-    // Unified List Getters (Merges Firebase with Offline Cache)
     function getAllSessions() {
       const offline = getOfflineList('offline_study_sessions');
       return [...offline, ...remoteSessions].sort((a, b) => b.createdAt - a.createdAt);
@@ -1347,11 +1219,9 @@
       return [...remoteStickers, ...offline];
     }
 
-    // Flushes all offline saved items to Firebase when connection is available
     async function syncOfflineQueueToFirebase() {
       if (!navigator.onLine) return;
 
-      // 1. Sync offline study sessions
       const offlineSessions = getOfflineList('offline_study_sessions');
       if (offlineSessions.length > 0) {
         for (const item of offlineSessions) {
@@ -1363,7 +1233,6 @@
         localStorage.removeItem('offline_study_sessions');
       }
 
-      // 2. Sync offline music tracks
       const offlineTracks = getOfflineList('offline_music');
       if (offlineTracks.length > 0) {
         for (const item of offlineTracks) {
@@ -1375,7 +1244,6 @@
         localStorage.removeItem('offline_music');
       }
 
-      // 3. Sync offline stickers
       const offlineStickers = getOfflineList('offline_stickers');
       if (offlineStickers.length > 0) {
         for (const item of offlineStickers) {
@@ -1399,7 +1267,6 @@
       renderStickersOnTimer();
       if (historyModal.classList.contains('open')) renderHistory();
       if (musicModal.classList.contains('open')) renderMusic();
-      if (stickersModal.classList.contains('open')) renderStickersGrid();
     }
 
     // Prevent Ctrl+A highlighting entire page
@@ -1435,15 +1302,6 @@
 
     closeMusic.addEventListener('click', () => {
       musicModal.classList.remove('open');
-    });
-
-    openStickersModal.addEventListener('click', () => {
-      renderStickersGrid();
-      stickersModal.classList.add('open');
-    });
-
-    closeStickersModal.addEventListener('click', () => {
-      stickersModal.classList.remove('open');
     });
 
     openAddDialogBtn.addEventListener('click', () => {
@@ -1709,7 +1567,6 @@
       isSeeking = false;
     });
 
-    // Add Music: Stays on modal without redirecting to timer
     musicAddForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawInput = musicUrlInput.value.trim();
@@ -1740,7 +1597,6 @@
       };
 
       if (!navigator.onLine) {
-        // Save to offline queue
         appendOfflineItem('offline_music', { firebaseKey: 'off_' + Date.now(), ...trackData });
         musicUrlInput.value = '';
         addTrackDialog.classList.remove('open');
@@ -1752,7 +1608,6 @@
           musicUrlInput.value = '';
           addTrackDialog.classList.remove('open');
         } catch (err) {
-          // Fallback to offline queue if database rejected
           appendOfflineItem('offline_music', { firebaseKey: 'off_' + Date.now(), ...trackData });
           musicUrlInput.value = '';
           addTrackDialog.classList.remove('open');
@@ -1878,56 +1733,6 @@
       });
     }
 
-    // Save Sticker (Handles Offline Fallback Automatically)
-    async function saveSticker(url) {
-      const stickerData = {
-        url: url,
-        x: 60,
-        y: 120,
-        size: 140,
-        locked: false,
-        createdAt: Date.now()
-      };
-
-      if (!navigator.onLine) {
-        appendOfflineItem('offline_stickers', { firebaseKey: 'off_' + Date.now(), ...stickerData });
-        refreshAllViews();
-      } else {
-        try {
-          const newRef = push(stickersRef);
-          await set(newRef, stickerData);
-        } catch (err) {
-          appendOfflineItem('offline_stickers', { firebaseKey: 'off_' + Date.now(), ...stickerData });
-          refreshAllViews();
-        }
-      }
-    }
-
-    addStickerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const url = stickerUrlInput.value.trim();
-      if (!url) return;
-      await saveSticker(url);
-      stickerUrlInput.value = '';
-    });
-
-    localStickerFile.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (file.size > 2.5 * 1024 * 1024) {
-        alert('File size exceeds 2.5MB. Please choose a smaller transparent PNG.');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        await saveSticker(event.target.result);
-        localStickerFile.value = '';
-      };
-      reader.readAsDataURL(file);
-    });
-
     onValue(stickersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -1936,12 +1741,9 @@
         remoteStickers = [];
       }
       renderStickersOnTimer();
-      if (stickersModal.classList.contains('open')) {
-        renderStickersGrid();
-      }
     });
 
-    // Render Stickers on Main Timer
+    // Render Stickers on Main Timer Workspace
     function renderStickersOnTimer() {
       const allStickers = getAllStickers();
       stickersCanvas.innerHTML = '';
@@ -1996,78 +1798,6 @@
         });
 
         stickersCanvas.appendChild(el);
-      });
-    }
-
-    function renderStickersGrid() {
-      const allStickers = getAllStickers();
-      if (!allStickers.length) {
-        stickersGrid.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted); grid-column: 1 / -1;">No active stickers on screen. Upload a PNG from your device or paste a URL above.</p>';
-        return;
-      }
-
-      stickersGrid.innerHTML = '';
-      allStickers.forEach(stk => {
-        const isLocked = !!stk.locked;
-        const card = document.createElement('div');
-        card.className = 'sticker-grid-card';
-        card.innerHTML = `
-          <img src="${stk.url}" alt="sticker" />
-          <div class="sticker-scale-control">
-            <span>Size</span>
-            <input type="range" min="60" max="320" value="${stk.size || 140}" ${isLocked ? 'disabled' : ''} />
-          </div>
-          <div style="display: flex; gap: 8px; align-self: flex-end; align-items: center; margin-top: 2px;">
-            <button class="nav-icon-btn lock-stk-btn" title="${isLocked ? 'Unlock Position' : 'Lock / Fix Position'}" style="padding: 3px; font-size: 12px; font-weight: bold; color: ${isLocked ? '#10b981' : 'var(--text-muted)'};">
-              ✓
-            </button>
-            <button class="nav-icon-btn del-stk-btn" title="Delete Sticker" style="padding: 3px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-        `;
-
-        const slider = card.querySelector('input');
-        slider.addEventListener('change', () => {
-          const val = parseInt(slider.value);
-          if (stk.firebaseKey.startsWith('off_')) {
-            const offStickers = getOfflineList('offline_stickers').map(s => {
-              if (s.firebaseKey === stk.firebaseKey) return { ...s, size: val };
-              return s;
-            });
-            setOfflineList('offline_stickers', offStickers);
-            renderStickersOnTimer();
-          } else {
-            set(ref(db, `stickers/${stk.firebaseKey}/size`), val);
-          }
-        });
-
-        card.querySelector('.lock-stk-btn').addEventListener('click', async () => {
-          if (stk.firebaseKey.startsWith('off_')) {
-            const offStickers = getOfflineList('offline_stickers').map(s => {
-              if (s.firebaseKey === stk.firebaseKey) return { ...s, locked: !isLocked };
-              return s;
-            });
-            setOfflineList('offline_stickers', offStickers);
-            renderStickersOnTimer();
-            renderStickersGrid();
-          } else {
-            await set(ref(db, `stickers/${stk.firebaseKey}/locked`), !isLocked);
-          }
-        });
-
-        card.querySelector('.del-stk-btn').addEventListener('click', async () => {
-          if (stk.firebaseKey.startsWith('off_')) {
-            const offStickers = getOfflineList('offline_stickers').filter(s => s.firebaseKey !== stk.firebaseKey);
-            setOfflineList('offline_stickers', offStickers);
-            renderStickersOnTimer();
-            renderStickersGrid();
-          } else {
-            await remove(ref(db, `stickers/${stk.firebaseKey}`));
-          }
-        });
-
-        stickersGrid.appendChild(card);
       });
     }
 
@@ -2349,7 +2079,6 @@
         } else {
           historyModal.classList.remove('open');
           musicModal.classList.remove('open');
-          stickersModal.classList.remove('open');
           closeAllDropdowns();
         }
       }
@@ -2361,7 +2090,7 @@
       }
     });
 
-    // Initial render from existing local cache
+    // Initial render
     refreshAllViews();
   </script>
 </body>
